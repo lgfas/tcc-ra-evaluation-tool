@@ -56,10 +56,10 @@ Os papéis/stakeholders associados a uma questão devem pertencer à mesma vers�
 
 ---
 
-## Avaliações
+## Avaliações por checklist
 
-### RN-AVA-01 — Composição da avaliação
-Cada avaliação deve estar associada a exatamente:
+### RN-AVA-01 — Composição da avaliação por checklist
+Cada avaliação por checklist deve estar associada a exatamente:
 
 - uma versão de Arquitetura de Referência; e
 - uma versão de checklist.
@@ -194,3 +194,10 @@ Um mesmo critério de conformidade pode resultar em mais de uma violação dentr
 
 ### RN-CONF-09 — Um resultado por critério em cada avaliação
 Cada critério de conformidade deve possuir, no máximo, um resultado registrado em uma mesma avaliação de conformidade.
+
+---
+
+## Usuários e autenticação
+
+### RN-USR-01 — E-mail do usuário é único
+Cada endereço de e-mail pode estar associado a apenas uma conta de usuário.

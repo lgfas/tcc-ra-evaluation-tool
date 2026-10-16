@@ -56,10 +56,10 @@ O sistema deve permitir registrar informações sobre a origem ou fonte de uma c
 
 ---
 
-## Avaliações
+## Avaliações por checklist
 
-### RF-AVA-01 — Criar avaliação
-O sistema deve permitir criar uma avaliação de uma versão de Arquitetura de Referência.
+### RF-AVA-01 — Criar avaliação por checklist
+O sistema deve permitir criar uma avaliação por checklist de uma versão de Arquitetura de Referência.
 
 ### RF-AVA-02 — Selecionar checklist da avaliação
 O sistema deve permitir associar uma versão de checklist à avaliação.
@@ -67,8 +67,8 @@ O sistema deve permitir associar uma versão de checklist à avaliação.
 ### RF-AVA-03 — Adicionar participantes
 O sistema deve permitir adicionar usuários como participantes de uma avaliação.
 
-### RF-AVA-04 — Atribuir papel ao participante
-O sistema deve permitir associar um ou mais stakeholders/papéis a cada participante da avaliação.
+### RF-AVA-04 — Atribuir papéis ao participante
+O sistema deve permitir associar um ou mais stakeholders/papéis a um participante da avaliação, quando aplicável.
 
 ### RF-AVA-05 — Responder questão de avaliação
 O sistema deve permitir ao avaliador responder às questões atribuídas ao seu papel.

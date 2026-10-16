@@ -73,3 +73,8 @@ A implementação deve manter separação entre regras de negócio, persistênci
 
 ### RNF-14 — Manutenibilidade
 O código deve ser organizado de forma modular, permitindo que funcionalidades sejam alteradas ou adicionadas com impacto limitado sobre os demais módulos do sistema.
+
+### RNF-15 — Proteção das credenciais
+As senhas dos usuários não devem ser armazenadas em texto puro.
+
+O sistema deve armazenar apenas representações protegidas das senhas utilizando mecanismo apropriado de hashing de senhas.

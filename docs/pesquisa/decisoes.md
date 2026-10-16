@@ -16,10 +16,10 @@ A inclusão de Workspaces exigiria regras adicionais de membros, permissões, pr
 
 ---
 
-## D02 — Uma avaliação utiliza uma versão de RA e uma versão de checklist
+## D02 — Uma avaliação por checklist utiliza uma versão de RA e uma versão de checklist
 
 ### Decisão
-Cada avaliação será realizada utilizando exatamente:
+Cada avaliação por checklist será realizada utilizando exatamente:
 
 - uma versão de Arquitetura de Referência; e
 - uma versão de checklist.
@@ -156,3 +156,19 @@ Requisitos desse tipo poderão ser expressos por meio de critérios de conformid
 Embora abordagens como MORE representem componentes obrigatórios e realizem verificações automáticas sobre sua presença, essa estrutura não é necessária para a avaliação manual inicialmente proposta.
 
 Caso a automação de conformidade seja incorporada futuramente, a classificação de elementos obrigatórios e opcionais poderá ser adicionada ao modelo.
+
+---
+
+## D12 — Autenticação simples no MVP
+
+### Decisão
+A primeira versão da ferramenta utilizará autenticação por e-mail e senha.
+
+O MVP deverá contemplar cadastro, autenticação e encerramento de sessão.
+
+Funcionalidades como autenticação social, autenticação multifator, confirmação de e-mail e recuperação de senha não fazem parte do escopo inicial.
+
+### Motivação
+A autenticação é necessária para identificar proprietários de artefatos, controlar acesso a conteúdo privado e identificar participantes das avaliações.
+
+Mecanismos adicionais de autenticação aumentariam a complexidade do projeto sem contribuir diretamente para o objetivo principal do TCC.
