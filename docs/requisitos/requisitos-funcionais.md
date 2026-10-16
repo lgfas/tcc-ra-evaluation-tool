@@ -94,3 +94,50 @@ O sistema deve permitir utilizar em uma avaliação uma versão pública de uma 
 
 ### RF-CAT-05 — Criar derivação de checklist
 O sistema deve permitir criar uma nova checklist a partir de uma versão existente, preservando a referência à checklist de origem.
+
+---
+
+## Instanciações
+
+### RF-INS-01 — Cadastrar arquitetura concreta
+O sistema deve permitir cadastrar uma arquitetura concreta derivada de uma Arquitetura de Referência.
+
+### RF-INS-02 — Versionar arquitetura concreta
+O sistema deve permitir manter diferentes versões de uma arquitetura concreta.
+
+### RF-INS-03 — Associar versão concreta à versão da RA
+O sistema deve permitir associar cada versão de uma arquitetura concreta à versão da Arquitetura de Referência utilizada como sua base.
+
+### RF-INS-04 — Cadastrar elementos da arquitetura concreta
+O sistema deve permitir cadastrar elementos arquiteturais pertencentes a uma versão da arquitetura concreta.
+
+### RF-INS-05 — Mapear elementos da arquitetura concreta para elementos da RA
+O sistema deve permitir relacionar elementos de uma versão da arquitetura concreta aos elementos da versão da Arquitetura de Referência correspondente.
+
+### RF-INS-06 — Visualizar mapeamentos
+O sistema deve permitir visualizar os mapeamentos existentes entre os elementos da arquitetura concreta e os elementos da Arquitetura de Referência.
+
+---
+
+## Conformidade
+
+### RF-CONF-01 — Cadastrar critério de conformidade
+O sistema deve permitir cadastrar critérios de conformidade associados a uma versão de Arquitetura de Referência.
+
+### RF-CONF-02 — Associar critério de conformidade a elementos da RA
+O sistema deve permitir associar um critério de conformidade a um ou mais elementos arquiteturais da versão da RA.
+
+### RF-CONF-03 — Criar avaliação de conformidade
+O sistema deve permitir criar uma avaliação de conformidade entre uma versão de arquitetura concreta e a versão da Arquitetura de Referência utilizada como sua base.
+
+### RF-CONF-04 — Registrar resultado de conformidade
+O sistema deve permitir registrar manualmente o resultado da verificação de cada critério de conformidade.
+
+### RF-CONF-05 — Registrar evidências de conformidade
+O sistema deve permitir registrar evidências que fundamentem o resultado de uma verificação de conformidade.
+
+### RF-CONF-06 — Registrar violações
+O sistema deve permitir registrar violações identificadas durante a avaliação de conformidade, associando-as ao critério de conformidade correspondente.
+
+### RF-CONF-07 — Visualizar resultados de conformidade
+O sistema deve permitir visualizar de forma consolidada os resultados e as violações identificadas em uma avaliação de conformidade.
