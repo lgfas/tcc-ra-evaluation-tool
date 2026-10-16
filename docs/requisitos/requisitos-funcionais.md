@@ -114,10 +114,13 @@ O sistema deve permitir associar cada versão de uma arquitetura concreta à ver
 ### RF-INS-04 — Cadastrar elementos da arquitetura concreta
 O sistema deve permitir cadastrar elementos arquiteturais pertencentes a uma versão da arquitetura concreta.
 
-### RF-INS-05 — Mapear elementos da arquitetura concreta para elementos da RA
+### RF-INS-05 — Classificar elementos da arquitetura concreta
+O sistema deve permitir associar um tipo a cada elemento arquitetural de uma arquitetura concreta.
+
+### RF-INS-06 — Mapear elementos da arquitetura concreta para elementos da RA
 O sistema deve permitir relacionar elementos de uma versão da arquitetura concreta aos elementos da versão da Arquitetura de Referência correspondente.
 
-### RF-INS-06 — Visualizar mapeamentos
+### RF-INS-07 — Visualizar mapeamentos
 O sistema deve permitir visualizar os mapeamentos existentes entre os elementos da arquitetura concreta e os elementos da Arquitetura de Referência.
 
 ---
@@ -144,3 +147,14 @@ O sistema deve permitir registrar violações identificadas durante a avaliaçã
 
 ### RF-CONF-07 — Visualizar resultados de conformidade
 O sistema deve permitir visualizar de forma consolidada os resultados e as violações identificadas em uma avaliação de conformidade.
+
+## Usuários e autenticação
+
+### RF-USR-01 — Cadastrar usuário
+O sistema deve permitir que uma pessoa crie uma conta informando nome, e-mail e senha.
+
+### RF-USR-02 — Autenticar usuário
+O sistema deve permitir que um usuário cadastrado se autentique utilizando suas credenciais.
+
+### RF-USR-03 — Encerrar sessão
+O sistema deve permitir que um usuário autenticado encerre sua sessão.

@@ -48,6 +48,12 @@ Uma questão pode ser destinada a um ou mais papéis/stakeholders.
 ### RN-CHK-08 — Origem da checklist deve ser preservada
 Quando uma checklist for baseada ou adaptada de outra fonte, o sistema deve manter informações que permitam identificar sua origem.
 
+### RN-CHK-09 — Seção da questão pertence à mesma versão
+Quando uma questão estiver associada a uma seção, a seção deve pertencer à mesma versão de checklist da questão.
+
+### RN-CHK-10 — Stakeholders da questão pertencem à mesma versão
+Os papéis/stakeholders associados a uma questão devem pertencer à mesma versão de checklist da questão.
+
 ---
 
 ## Avaliações
@@ -63,8 +69,12 @@ Após o início de uma avaliação, as versões da Arquitetura de Referência e 
 
 Caso seja necessário avaliar outra versão da RA ou da checklist, uma nova avaliação deve ser criada.
 
-### RN-AVA-03 — Participante possui papel na avaliação
-Todo participante responsável por responder questões deve possuir pelo menos um papel/stakeholder associado no contexto daquela avaliação.
+### RN-AVA-03 — Papéis do participante são opcionais
+Um participante de uma avaliação pode possuir zero ou mais papéis/stakeholders associados.
+
+Quando possuir papéis, o participante deve receber as questões associadas a esses papéis, além das questões sem stakeholder específico.
+
+Quando não possuir nenhum papel, o participante deve receber somente as questões sem stakeholder específico.
 
 ### RN-AVA-04 — Questões são disponibilizadas de acordo com o papel
 Um avaliador deve ter acesso às questões associadas aos papéis/stakeholders que exerce naquela avaliação.
@@ -84,6 +94,14 @@ Um participante deve possuir, no máximo, uma resposta ativa para cada questão 
 
 ### RN-AVA-08 — Comentários respeitam a configuração da questão
 O preenchimento de comentários deve respeitar a configuração definida para a questão correspondente.
+
+### RN-AVA-09 — Papel do participante deve pertencer à checklist da avaliação
+Os papéis atribuídos a um participante devem pertencer à versão de checklist utilizada pela avaliação da qual ele participa.
+
+### RN-AVA-10 — Resposta deve utilizar questão da checklist da avaliação
+Uma resposta somente pode referenciar uma questão pertencente à versão de checklist utilizada pela avaliação.
+
+Quando a questão utilizar resposta por seleção, a opção selecionada deve pertencer à própria questão respondida.
 
 ---
 
@@ -173,3 +191,6 @@ Quando aplicável, a violação também pode indicar os elementos da RA e da arq
 
 ### RN-CONF-08 — Um critério pode originar múltiplas violações
 Um mesmo critério de conformidade pode resultar em mais de uma violação dentro da mesma avaliação.
+
+### RN-CONF-09 — Um resultado por critério em cada avaliação
+Cada critério de conformidade deve possuir, no máximo, um resultado registrado em uma mesma avaliação de conformidade.
