@@ -71,7 +71,7 @@ O sistema deve permitir adicionar usuários como participantes de uma avaliaçã
 O sistema deve permitir associar um ou mais stakeholders/papéis a um participante da avaliação, quando aplicável.
 
 ### RF-AVA-05 — Responder questão de avaliação
-O sistema deve permitir ao avaliador responder às questões atribuídas ao seu papel.
+O sistema deve permitir ao avaliador responder às questões disponibilizadas a ele de acordo com seus papéis/stakeholders e com as questões comuns da avaliação.
 
 ### RF-AVA-06 — Comentar resposta
 O sistema deve permitir ao avaliador complementar sua resposta com comentários quando a questão permitir.

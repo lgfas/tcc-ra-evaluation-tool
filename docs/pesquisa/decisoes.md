@@ -172,3 +172,33 @@ Funcionalidades como autenticação social, autenticação multifator, confirma�
 A autenticação é necessária para identificar proprietários de artefatos, controlar acesso a conteúdo privado e identificar participantes das avaliações.
 
 Mecanismos adicionais de autenticação aumentariam a complexidade do projeto sem contribuir diretamente para o objetivo principal do TCC.
+
+---
+
+## D13 — Avaliações utilizam um ciclo de estados simples no MVP
+
+### Decisão
+As avaliações por checklist e as avaliações de conformidade utilizarão os seguintes estados:
+
+- `DRAFT`: avaliação criada e ainda não iniciada;
+- `IN_PROGRESS`: avaliação em execução;
+- `COMPLETED`: avaliação finalizada.
+
+### Motivação
+Os três estados são suficientes para representar o ciclo de vida necessário no MVP sem introduzir funcionalidades adicionais de cancelamento, reabertura, arquivamento ou controle de prazos.
+
+Estados adicionais poderão ser incorporados futuramente caso sejam necessários.
+
+---
+
+## D14 — Resultado de conformidade utiliza três estados
+
+### Decisão
+O resultado da verificação de um critério de conformidade poderá assumir um dos seguintes estados:
+
+- `CONFORMING`: o critério foi atendido;
+- `NON_CONFORMING`: o critério não foi atendido;
+- `NOT_APPLICABLE`: o critério não se aplica à arquitetura concreta avaliada.
+
+### Motivação
+Os três estados representam os resultados necessários para a avaliação manual de conformidade proposta para o MVP sem introduzir escalas intermediárias de conformidade.

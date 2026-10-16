@@ -14,7 +14,7 @@ Quando for necessário alterar a RA, uma nova versão deve ser criada.
 Todo elemento arquitetural cadastrado deve estar associado a uma versão específica de uma Arquitetura de Referência.
 
 ### RN-RA-03 — Tipos de elementos podem ser predefinidos ou customizados
-Um elemento arquitetural pode utilizar um tipo disponibilizado pela ferramenta ou um tipo customizado definido pelo responsável pela RA.
+Um elemento arquitetural pode utilizar um tipo disponibilizado pela ferramenta ou um tipo customizado criado por um usuário.
 
 ---
 
@@ -103,6 +103,9 @@ Uma resposta somente pode referenciar uma questão pertencente à versão de che
 
 Quando a questão utilizar resposta por seleção, a opção selecionada deve pertencer à própria questão respondida.
 
+### RN-AVA-11 — Estados da avaliação por checklist
+Uma avaliação por checklist deve possuir um dos seguintes estados: `DRAFT`, `IN_PROGRESS` ou `COMPLETED`.
+
 ---
 
 ## Catálogo e compartilhamento
@@ -154,6 +157,9 @@ Os mapeamentos realizados entre uma versão concreta e uma versão da RA pertenc
 
 A criação de uma nova versão da arquitetura concreta ou da RA não deve transferir automaticamente os mapeamentos existentes.
 
+### RN-INS-07 — Elementos concretos possuem um tipo arquitetural
+Todo elemento de uma arquitetura concreta deve estar associado a um tipo arquitetural disponibilizado pela ferramenta ou criado por um usuário.
+
 ---
 
 ## Conformidade
@@ -194,6 +200,14 @@ Um mesmo critério de conformidade pode resultar em mais de uma violação dentr
 
 ### RN-CONF-09 — Um resultado por critério em cada avaliação
 Cada critério de conformidade deve possuir, no máximo, um resultado registrado em uma mesma avaliação de conformidade.
+
+### RN-CONF-10 — Estados da avaliação de conformidade
+Uma avaliação de conformidade deve possuir um dos seguintes estados: `DRAFT`, `IN_PROGRESS` ou `COMPLETED`.
+
+### RN-CONF-11 — Estados do resultado de conformidade
+Um resultado de conformidade deve possuir um dos seguintes estados: `CONFORMING`, `NON_CONFORMING` ou `NOT_APPLICABLE`.
+
+Violações somente devem ser registradas para resultados classificados como `NON_CONFORMING`.
 
 ---
 
