@@ -20,6 +20,9 @@ O sistema deve permitir registrar a descrição de um elemento arquitetural util
 ### RF-RA-06 — Definir tipos customizados de elementos
 O sistema deve permitir utilizar tipos de elementos arquiteturais além dos tipos previamente disponibilizados pela ferramenta.
 
+### RF-RA-07 — Visualizar avaliações da Arquitetura de Referência
+O sistema deve permitir visualizar as avaliações por checklist e as avaliações de conformidade associadas às versões de uma Arquitetura de Referência.
+
 ---
 
 ## Checklists e critérios

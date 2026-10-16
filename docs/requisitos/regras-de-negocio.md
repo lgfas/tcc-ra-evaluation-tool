@@ -103,3 +103,73 @@ Ao derivar uma checklist existente, deve ser criada uma nova checklist independe
 
 ### RN-CAT-05 — Derivação preserva rastreabilidade
 Uma checklist derivada deve manter referência à checklist e à versão que lhe deram origem.
+
+---
+
+## Instanciações
+
+### RN-INS-01 — Arquitetura concreta é versionada
+Uma arquitetura concreta pode possuir diferentes versões.
+
+Alterações realizadas em uma versão já utilizada em uma avaliação de conformidade não devem modificar retroativamente os dados considerados naquela avaliação.
+
+Quando necessário preservar o estado anterior da arquitetura concreta, uma nova versão deve ser criada.
+
+### RN-INS-02 — Versão concreta possui uma versão da RA como base
+Cada versão de uma arquitetura concreta deve estar associada a exatamente uma versão da Arquitetura de Referência utilizada como sua base.
+
+Uma mesma arquitetura concreta pode possuir versões baseadas em diferentes versões da RA ao longo de sua evolução.
+
+### RN-INS-03 — Elementos pertencem a uma versão concreta
+Todo elemento arquitetural de uma arquitetura concreta deve estar associado a uma versão específica dessa arquitetura.
+
+### RN-INS-04 — Mapeamentos respeitam as versões relacionadas
+Um elemento de uma arquitetura concreta somente pode ser mapeado para elementos da versão da Arquitetura de Referência utilizada como base daquela versão concreta.
+
+### RN-INS-05 — Mapeamentos não são limitados a relações um-para-um
+Um elemento de uma versão da arquitetura concreta pode estar relacionado a um ou mais elementos da versão da RA.
+
+Da mesma forma, um elemento da versão da RA pode estar relacionado a um ou mais elementos da arquitetura concreta.
+
+### RN-INS-06 — Mapeamentos são específicos da versão
+Os mapeamentos realizados entre uma versão concreta e uma versão da RA pertencem àquela combinação específica de versões.
+
+A criação de uma nova versão da arquitetura concreta ou da RA não deve transferir automaticamente os mapeamentos existentes.
+
+---
+
+## Conformidade
+
+### RN-CONF-01 — Composição da avaliação de conformidade
+Cada avaliação de conformidade deve estar associada a exatamente:
+
+- uma versão de arquitetura concreta; e
+- a versão da Arquitetura de Referência utilizada como base por essa arquitetura concreta.
+
+### RN-CONF-02 — Critérios de conformidade pertencem a uma versão da RA
+Todo critério de conformidade deve estar associado a uma versão específica de uma Arquitetura de Referência.
+
+### RN-CONF-03 — Associação do critério a elementos da RA é opcional
+Um critério de conformidade pode se aplicar à versão da RA como um todo ou estar associado a um ou mais elementos arquiteturais específicos.
+
+### RN-CONF-04 — Verificação de conformidade é manual no MVP
+Na versão inicial da ferramenta, o resultado de cada critério de conformidade deve ser informado pelo responsável pela avaliação.
+
+A ferramenta deve apoiar o registro e a organização da avaliação, mas não deve inferir automaticamente a conformidade da arquitetura concreta.
+
+### RN-CONF-05 — Resultado pertence a um critério da avaliação
+Todo resultado de conformidade deve estar associado a:
+
+- uma avaliação de conformidade; e
+- um critério de conformidade considerado nessa avaliação.
+
+### RN-CONF-06 — Evidências fundamentam resultados
+Uma verificação de conformidade pode possuir evidências que fundamentem o resultado registrado.
+
+### RN-CONF-07 — Violação identifica uma não conformidade
+Toda violação registrada deve estar associada à avaliação de conformidade e ao critério de conformidade que não foi atendido.
+
+Quando aplicável, a violação também pode indicar os elementos da RA e da arquitetura concreta envolvidos.
+
+### RN-CONF-08 — Um critério pode originar múltiplas violações
+Um mesmo critério de conformidade pode resultar em mais de uma violação dentro da mesma avaliação.
