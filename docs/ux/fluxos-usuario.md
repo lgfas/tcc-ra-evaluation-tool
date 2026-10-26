@@ -1,4 +1,4 @@
-# Fluxos de Usuário — v0.1
+# Fluxos de Usuário — v0.2
 
 > Este documento descreve os principais fluxos de interação previstos para o MVP da ferramenta.
 >
@@ -8,7 +8,7 @@
 
 ### Objetivo
 
-Permitir que um usuário autenticado cadastre uma nova Arquitetura de Referência, crie sua primeira versão e registre os elementos arquiteturais que a compõem.
+Permitir que um usuário autenticado cadastre uma nova Arquitetura de Referência, gerencie colaboradores, crie sua primeira versão, registre imagens e cadastre os elementos arquiteturais que a compõem.
 
 ### Ator principal
 
@@ -27,30 +27,35 @@ Usuário autenticado.
    - nome;
    - visibilidade (`PUBLIC` ou `PRIVATE`).
 4. O usuário informa os dados e confirma o cadastro.
-5. O sistema cria a Arquitetura de Referência e solicita os dados de sua primeira versão:
+5. O sistema cria a Arquitetura de Referência e registra o usuário criador como membro `OWNER`.
+6. O proprietário pode adicionar zero ou mais usuários como colaboradores `EDITOR`.
+7. O sistema solicita os dados da primeira versão:
    - identificador da versão;
-   - descrição geral da versão em conteúdo textual formatado.
-6. O usuário informa os dados da versão e confirma.
-7. O sistema cria a primeira versão da RA.
-8. O usuário acessa a área de elementos arquiteturais da versão.
-9. O usuário seleciona a opção para adicionar um elemento arquitetural.
-10. O sistema solicita:
+   - descrição geral da versão em conteúdo textual formatado;
+   - imagens anexas, quando aplicável.
+8. O usuário informa os dados da versão e confirma.
+9. O sistema cria a primeira versão da RA.
+10. O usuário acessa a área de elementos arquiteturais da versão.
+11. O usuário seleciona a opção para adicionar um elemento arquitetural.
+12. O sistema solicita:
     - nome;
     - tipo do elemento;
-    - descrição em conteúdo textual formatado.
-11. O usuário seleciona um tipo arquitetural existente ou cria um tipo customizado.
-12. O usuário confirma o cadastro do elemento.
-13. O sistema adiciona o elemento à versão da RA.
-14. O usuário pode repetir o processo para cadastrar outros elementos.
-15. O usuário retorna à visão geral da versão da RA.
+    - descrição em conteúdo textual formatado;
+    - imagens anexas, quando aplicável.
+13. O usuário seleciona um tipo arquitetural existente ou cria um tipo customizado.
+14. O usuário confirma o cadastro do elemento.
+15. O sistema adiciona o elemento e seus anexos à versão da RA.
+16. O usuário pode repetir o processo para cadastrar outros elementos.
+17. O usuário retorna à visão geral da versão da RA.
 
 ### Resultado
 
 A Arquitetura de Referência fica cadastrada com:
 
+- um proprietário e zero ou mais colaboradores;
 - uma primeira versão;
-- sua descrição geral;
-- zero ou mais elementos arquiteturais;
+- sua descrição geral e imagens associadas, quando existirem;
+- zero ou mais elementos arquiteturais, cada um podendo possuir imagens;
 - os tipos associados aos elementos cadastrados.
 
 ### Fluxos alternativos
@@ -77,6 +82,22 @@ Durante o cadastro de um elemento, caso o tipo desejado não esteja disponível:
 6. O usuário cadastra os elementos arquiteturais correspondentes à nova versão.
 
 > No MVP, os elementos de uma versão anterior não são transferidos automaticamente para a nova versão.
+
+#### FA03 — Gerenciar colaboradores da RA
+
+1. O usuário `OWNER` acessa a área de colaboradores da Arquitetura de Referência.
+2. O usuário seleciona um usuário cadastrado e o adiciona como `EDITOR`.
+3. O sistema registra o colaborador.
+4. O colaborador passa a poder editar o conteúdo da RA conforme as permissões definidas no MVP.
+5. O `OWNER` pode remover posteriormente um colaborador `EDITOR`.
+
+#### FA04 — Anexar imagens à RA ou a seus elementos
+
+1. Durante a edição de uma versão ou de um elemento da RA, o usuário seleciona a opção para adicionar uma imagem.
+2. O sistema valida o arquivo enviado.
+3. O sistema armazena o arquivo e registra seus metadados.
+4. A imagem passa a ser exibida como conteúdo complementar à descrição textual.
+5. A imagem permanece associada exclusivamente ao contexto em que foi anexada.
 
 ---
 
@@ -316,7 +337,7 @@ Após o início, as versões da RA e da checklist utilizadas não podem ser subs
 
 ### Objetivo
 
-Permitir que um usuário cadastre uma arquitetura concreta derivada de uma versão de Arquitetura de Referência, descreva seus elementos arquiteturais e estabeleça manualmente os mapeamentos entre os elementos concretos e os elementos da RA.
+Permitir que um usuário cadastre colaborativamente uma arquitetura concreta derivada de uma versão de Arquitetura de Referência, descreva sua versão e seus elementos com conteúdo textual e imagens e estabeleça manualmente os mapeamentos entre os elementos concretos e os elementos da RA.
 
 ### Ator principal
 
@@ -335,41 +356,46 @@ Usuário autenticado responsável pela arquitetura concreta.
 4. O usuário seleciona a opção para cadastrar uma nova arquitetura concreta.
 5. O sistema solicita o nome da arquitetura concreta.
 6. O usuário informa o nome e confirma o cadastro.
-7. O sistema cria a arquitetura concreta e solicita os dados de sua primeira versão:
+7. O sistema cria a arquitetura concreta, registra o usuário criador como `OWNER` e mantém a versão da RA selecionada como referência para a primeira versão concreta.
+8. O proprietário pode adicionar zero ou mais usuários como colaboradores `EDITOR`.
+9. O sistema solicita os dados da primeira versão:
    - identificador da versão;
-   - descrição geral em conteúdo textual formatado.
-8. A versão da RA selecionada anteriormente é definida como base da versão concreta.
-9. O usuário confirma a criação da versão concreta.
-10. O sistema cria a primeira versão da arquitetura concreta.
-11. O usuário acessa a área de elementos da versão concreta.
-12. O usuário seleciona a opção para adicionar um elemento arquitetural.
-13. O sistema solicita:
+   - descrição geral em conteúdo textual formatado;
+   - imagens anexas, quando aplicável.
+10. A versão da RA selecionada anteriormente é definida como base da versão concreta.
+11. O usuário confirma a criação da versão concreta.
+12. O sistema cria a primeira versão da arquitetura concreta.
+13. O usuário acessa a área de elementos da versão concreta.
+14. O usuário seleciona a opção para adicionar um elemento arquitetural.
+15. O sistema solicita:
     - nome;
     - tipo arquitetural;
-    - descrição em conteúdo textual formatado.
-14. O usuário seleciona um tipo existente ou cria um tipo customizado.
-15. O usuário confirma o cadastro do elemento.
-16. O sistema adiciona o elemento à versão concreta.
-17. O usuário repete o processo para os demais elementos da arquitetura concreta.
-18. O usuário acessa a área de mapeamento entre a arquitetura concreta e a RA.
-19. O sistema apresenta:
+    - descrição em conteúdo textual formatado;
+    - imagens anexas, quando aplicável.
+16. O usuário seleciona um tipo existente ou cria um tipo customizado.
+17. O usuário confirma o cadastro do elemento.
+18. O sistema adiciona o elemento e seus anexos à versão concreta.
+19. O usuário repete o processo para os demais elementos da arquitetura concreta.
+20. O usuário acessa a área de mapeamento entre a arquitetura concreta e a RA.
+21. O sistema apresenta:
     - os elementos da versão concreta;
     - os elementos da versão da RA utilizada como base.
-20. O usuário seleciona um elemento concreto.
-21. O usuário seleciona um ou mais elementos da RA aos quais aquele elemento concreto corresponde.
-22. O usuário confirma o mapeamento.
-23. O sistema registra as correspondências.
-24. O usuário pode repetir o processo para os demais elementos.
-25. O sistema disponibiliza uma visualização consolidada dos mapeamentos existentes.
+22. O usuário seleciona um elemento concreto.
+23. O usuário seleciona um ou mais elementos da RA aos quais aquele elemento concreto corresponde.
+24. O usuário confirma o mapeamento.
+25. O sistema registra as correspondências.
+26. O usuário pode repetir o processo para os demais elementos.
+27. O sistema disponibiliza uma visualização consolidada dos mapeamentos existentes.
 
 ### Resultado
 
 A arquitetura concreta fica registrada com:
 
+- um proprietário e zero ou mais colaboradores;
 - uma primeira versão;
 - a versão da RA utilizada como base;
-- sua descrição geral;
-- seus elementos arquiteturais;
+- sua descrição geral e imagens associadas, quando existirem;
+- seus elementos arquiteturais, cada um podendo possuir imagens;
 - os tipos associados aos elementos;
 - os mapeamentos estabelecidos entre os elementos concretos e os elementos da RA.
 
@@ -418,6 +444,22 @@ Durante o cadastro de um elemento concreto, caso o tipo desejado não esteja dis
 
 > No MVP, os elementos e mapeamentos de versões anteriores não são transferidos automaticamente para a nova versão concreta.
 
+#### FA06 — Gerenciar colaboradores da arquitetura concreta
+
+1. O usuário `OWNER` acessa a área de colaboradores da arquitetura concreta.
+2. O usuário adiciona um usuário cadastrado como `EDITOR`.
+3. O sistema registra o colaborador.
+4. O colaborador passa a poder editar versões, elementos, imagens e mapeamentos conforme as permissões do MVP.
+5. O `OWNER` pode remover posteriormente um colaborador `EDITOR`.
+
+#### FA07 — Anexar imagens à arquitetura concreta ou a seus elementos
+
+1. Durante a edição de uma versão concreta ou de um elemento concreto, o usuário seleciona a opção para adicionar uma imagem.
+2. O sistema valida o arquivo enviado.
+3. O sistema armazena o arquivo e registra seus metadados.
+4. A imagem passa a complementar a descrição textual do contexto correspondente.
+5. A imagem permanece associada exclusivamente ao contexto em que foi anexada.
+
 ---
 
 ## Fluxo 05 — Criar e realizar uma avaliação de conformidade
@@ -465,8 +507,8 @@ Usuário autenticado responsável pela avaliação de conformidade.
     - `NON_CONFORMING`;
     - `NOT_APPLICABLE`.
 13. O usuário pode registrar observações sobre o resultado.
-14. O usuário pode adicionar uma ou mais evidências que fundamentem a avaliação.
-15. Caso o resultado seja `NON_CONFORMING`, o usuário pode registrar uma ou mais violações.
+14. O usuário pode adicionar uma ou mais evidências que fundamentem a avaliação, podendo registrar descrição, URL externa opcional e imagens.
+15. Caso o resultado seja `NON_CONFORMING`, o usuário pode registrar uma ou mais violações, podendo anexar imagens.
 16. Quando aplicável, o usuário associa a violação:
     - aos elementos da RA envolvidos;
     - aos elementos da arquitetura concreta envolvidos.
@@ -511,14 +553,14 @@ A avaliação de conformidade fica registrada com:
 #### FA03 — Resultado conforme
 
 1. O usuário seleciona `CONFORMING`.
-2. O sistema permite o registro de observações e evidências.
+2. O sistema permite o registro de observações e evidências, incluindo imagens quando aplicável.
 3. Nenhuma violação é registrada para o resultado.
 
 #### FA04 — Resultado não conforme
 
 1. O usuário seleciona `NON_CONFORMING`.
-2. O usuário pode registrar observações e evidências.
-3. O usuário registra uma ou mais violações identificadas.
+2. O usuário pode registrar observações e evidências, incluindo imagens quando aplicável.
+3. O usuário pode registrar uma ou mais violações identificadas e anexar imagens a cada violação.
 4. Para cada violação, quando aplicável, o usuário identifica os elementos da RA e da arquitetura concreta envolvidos.
 
 #### FA05 — Critério não aplicável
@@ -568,7 +610,7 @@ Usuário autenticado com acesso à Arquitetura de Referência.
 
 - O usuário deve estar autenticado.
 - A Arquitetura de Referência deve existir.
-- O usuário deve ser o responsável pela RA ou possuir acesso a ela por meio de sua visibilidade pública.
+- O usuário deve possuir acesso à RA como `OWNER`, `EDITOR` ou por meio de sua visibilidade pública.
 
 ### Fluxo principal
 
@@ -579,7 +621,7 @@ Usuário autenticado com acesso à Arquitetura de Referência.
    - versões existentes;
    - versão atualmente selecionada.
 3. O usuário seleciona a versão da RA que deseja consultar.
-4. O sistema apresenta a descrição geral da versão selecionada.
+4. O sistema apresenta a descrição geral e as imagens da versão selecionada, quando existirem.
 5. O sistema disponibiliza as áreas relacionadas àquela versão:
    - elementos arquiteturais;
    - avaliações por checklist;
@@ -589,7 +631,8 @@ Usuário autenticado com acesso à Arquitetura de Referência.
 7. O sistema apresenta os elementos cadastrados para a versão, incluindo:
    - nome;
    - tipo;
-   - descrição.
+   - descrição;
+   - imagens associadas, quando existirem.
 8. O usuário pode acessar a área de avaliações por checklist.
 9. O sistema apresenta as avaliações associadas à versão da RA, indicando:
    - checklist utilizada;
