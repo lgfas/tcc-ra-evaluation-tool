@@ -266,6 +266,7 @@ classDiagram
 
     Violation "0..*" -- "0..*" RAElement : involves
     Violation "0..*" -- "0..*" ConcreteElement : involves
+```
 
 ## Observações adicionadas na v0.2
 

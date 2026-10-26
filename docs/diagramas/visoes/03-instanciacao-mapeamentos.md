@@ -71,6 +71,7 @@ classDiagram
 
     ConcreteArchitecture "1" *-- "1..*" ConcreteArchitectureVersion : versions
     RAVersion "1" --> "0..*" ConcreteArchitectureVersion : basisFor
+    RAVersion "1" *-- "0..*" RAElement : elements
 
     ConcreteArchitectureVersion "1" *-- "0..*" ConcreteElement : elements
     ArchitecturalElementType "1" --> "0..*" ConcreteElement : classifies

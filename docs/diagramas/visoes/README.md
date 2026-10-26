@@ -7,7 +7,7 @@ Esta pasta separa o diagrama de classes do TCC em quatro visões para facilitar 
 3. `03-instanciacao-mapeamentos.md` — arquitetura concreta, colaboração, versões, elementos, RA base, imagens e mapeamentos.
 4. `04-conformidade.md` — critérios, avaliação de conformidade, resultados, evidências, violações e imagens.
 
-Os arquivos `.mmd` contêm apenas o bloco Mermaid; os `.md` estão prontos para documentação Markdown.
+Os arquivos `.md` são a fonte oficial dessas visões e contêm diretamente os blocos Mermaid renderizados pelo GitHub.
 
 ## Regras que o desenho sozinho não garante
 
@@ -16,6 +16,6 @@ Os arquivos `.mmd` contêm apenas o bloco Mermaid; os `.md` estão prontos para 
 - Os mapeamentos entre `ConcreteElement` e `RAElement` são muitos-para-muitos por meio de `ElementMapping`.
 - A ausência de mapeamento não determina não conformidade automaticamente.
 
-## Previews
+## Representação visual
 
-Os arquivos `*-preview.png` são representações equivalentes geradas apenas para inspeção visual da estrutura. Eles não substituem o Mermaid como fonte da documentação.
+As próprias visões Mermaid são a fonte da documentação. Exportações em PNG ou SVG podem ser geradas posteriormente para uso em slides, relatórios ou na monografia, evitando manter imagens duplicadas e potencialmente desatualizadas no repositório.

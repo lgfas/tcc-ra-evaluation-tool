@@ -80,9 +80,11 @@ classDiagram
         NOT_APPLICABLE
     }
 
+    RAVersion "1" *-- "0..*" RAElement : elements
     RAVersion "1" *-- "0..*" ConformanceCriterion : criteria
     ConformanceCriterion "0..*" -- "0..*" RAElement : appliesTo
 
+    ConcreteArchitectureVersion "1" *-- "0..*" ConcreteElement : elements
     ConcreteArchitectureVersion "1" --> "0..*" ConformanceEvaluation : evaluatedIn
     User "1" --> "0..*" ConformanceEvaluation : creates
 
@@ -91,6 +93,7 @@ classDiagram
 
     ConformanceResult "1" *-- "0..*" ConformanceEvidence : evidence
     ConformanceEvidence "1" *-- "0..*" ImageAttachment : images
+    User "1" --> "0..*" ImageAttachment : uploads
 
     ConformanceResult "1" *-- "0..*" Violation : violations
     Violation "1" *-- "0..*" ImageAttachment : images
