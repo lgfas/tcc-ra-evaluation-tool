@@ -1,4 +1,4 @@
-# Requisitos Não Funcionais — v0.1
+# Requisitos Não Funcionais — v0.2
 
 > Requisitos não funcionais iniciais da ferramenta.
 > Quando não indicado o contrário, estes requisitos representam decisões de projeto e deverão ser refinados e validados durante o desenvolvimento.
@@ -49,10 +49,14 @@ O sistema deve impedir associações inconsistentes entre entidades, como o mape
 ## Segurança e acesso
 
 ### RNF-09 — Controle de acesso
-O sistema deve restringir operações de criação, edição e participação em avaliações de acordo com as permissões e responsabilidades do usuário.
+O sistema deve restringir operações de criação, edição, colaboração e participação em avaliações de acordo com as permissões e responsabilidades do usuário.
+
+No caso de Arquiteturas de Referência e arquiteturas concretas colaborativas, as permissões devem distinguir ao menos os papéis `OWNER` e `EDITOR`.
 
 ### RNF-10 — Proteção de artefatos privados
-Arquiteturas de Referência e checklists definidos como privados não devem ser acessíveis a usuários não autorizados.
+Arquiteturas de Referência e checklists definidos como privados, arquiteturas concretas e demais conteúdos protegidos não devem ser acessíveis a usuários não autorizados.
+
+Imagens anexadas devem herdar as restrições de acesso do conteúdo ao qual pertencem.
 
 ---
 
@@ -78,3 +82,13 @@ O código deve ser organizado de forma modular, permitindo que funcionalidades s
 As senhas dos usuários não devem ser armazenadas em texto puro.
 
 O sistema deve armazenar apenas representações protegidas das senhas utilizando mecanismo apropriado de hashing de senhas.
+
+---
+
+## Arquivos e imagens
+
+### RNF-16 — Validação de imagens enviadas
+O sistema deve validar arquivos enviados como imagem antes de associá-los aos artefatos da aplicação, aceitando somente formatos de imagem suportados pela implementação.
+
+### RNF-17 — Armazenamento e referência de imagens
+A implementação deve preservar metadados suficientes para identificar e recuperar as imagens anexadas sem acoplar as regras de negócio a um provedor específico de armazenamento.

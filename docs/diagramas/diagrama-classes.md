@@ -1,4 +1,4 @@
-# Diagrama de Classes — v0.1
+# Diagrama de Classes — v0.2
 
 > Diagrama de classes inicial derivado do MER, dos requisitos e das regras de negócio.
 >
@@ -18,6 +18,11 @@ classDiagram
         +Id id
         +String name
         +Visibility visibility
+    }
+
+    class ReferenceArchitectureMember {
+        +Id id
+        +CollaborationRole role
     }
 
     class RAVersion {
@@ -98,6 +103,11 @@ classDiagram
         +String name
     }
 
+    class ConcreteArchitectureMember {
+        +Id id
+        +CollaborationRole role
+    }
+
     class ConcreteArchitectureVersion {
         +Id id
         +String version
@@ -144,6 +154,20 @@ classDiagram
         +String description
     }
 
+    class ImageAttachment {
+        +Id id
+        +String storageKey
+        +String originalName
+        +String contentType
+        +DateTime createdAt
+    }
+
+    class CollaborationRole {
+        <<enumeration>>
+        OWNER
+        EDITOR
+    }
+
     class Visibility {
         <<enumeration>>
         PRIVATE
@@ -178,14 +202,21 @@ classDiagram
     }
 
 
-    User "1" --> "0..*" ReferenceArchitecture : owns
+    User "1" --> "0..*" ReferenceArchitectureMember : member
+    ReferenceArchitecture "1" *-- "1..*" ReferenceArchitectureMember : collaborators
+
     User "1" --> "0..*" Checklist : owns
-    User "1" --> "0..*" ConcreteArchitecture : owns
+
+    User "1" --> "0..*" ConcreteArchitectureMember : member
+    ConcreteArchitecture "1" *-- "1..*" ConcreteArchitectureMember : collaborators
 
     User "0..1" --> "0..*" ArchitecturalElementType : creates
+    User "1" --> "0..*" ImageAttachment : uploads
 
     ReferenceArchitecture "1" *-- "1..*" RAVersion : versions
     RAVersion "1" *-- "0..*" RAElement : elements
+    RAVersion "1" *-- "0..*" ImageAttachment : images
+    RAElement "1" *-- "0..*" ImageAttachment : images
     ArchitecturalElementType "1" --> "0..*" RAElement : classifies
 
     Checklist "1" *-- "1..*" ChecklistVersion : versions
@@ -212,6 +243,8 @@ classDiagram
     ConcreteArchitecture "1" *-- "1..*" ConcreteArchitectureVersion : versions
     RAVersion "1" --> "0..*" ConcreteArchitectureVersion : basisFor
     ConcreteArchitectureVersion "1" *-- "0..*" ConcreteElement : elements
+    ConcreteArchitectureVersion "1" *-- "0..*" ImageAttachment : images
+    ConcreteElement "1" *-- "0..*" ImageAttachment : images
     ArchitecturalElementType "1" --> "0..*" ConcreteElement : classifies
 
     ConcreteElement "1" --> "0..*" ElementMapping : source
@@ -227,7 +260,25 @@ classDiagram
     ConformanceCriterion "1" --> "0..*" ConformanceResult : criterion
 
     ConformanceResult "1" *-- "0..*" ConformanceEvidence : evidence
+    ConformanceEvidence "1" *-- "0..*" ImageAttachment : images
     ConformanceResult "1" *-- "0..*" Violation : violations
+    Violation "1" *-- "0..*" ImageAttachment : images
 
     Violation "0..*" -- "0..*" RAElement : involves
     Violation "0..*" -- "0..*" ConcreteElement : involves
+
+## Observações adicionadas na v0.2
+
+### Colaboração
+
+A autoria colaborativa de Arquiteturas de Referência e arquiteturas concretas é representada por `ReferenceArchitectureMember` e `ConcreteArchitectureMember`.
+
+Cada artefato deve possuir exatamente um membro com papel `OWNER` e pode possuir zero ou mais membros com papel `EDITOR`. As permissões detalhadas são definidas pelas regras de negócio.
+
+### Imagens
+
+`ImageAttachment` representa conceitualmente uma imagem anexada a conteúdo da aplicação.
+
+No MVP, cada imagem pertence a um único contexto: versão da RA, elemento da RA, versão da arquitetura concreta, elemento concreto, evidência de conformidade ou violação. A estratégia física de persistência dos anexos será definida na arquitetura técnica sem acoplar o domínio a um provedor específico.
+
+Imagens associadas às descrições gerais de RAs e arquiteturas concretas pertencem às respectivas versões para preservar o histórico.

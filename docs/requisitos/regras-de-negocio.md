@@ -1,4 +1,4 @@
-# Regras de Negócio — v0.1
+# Regras de Negócio — v0.2
 
 > Regras iniciais derivadas dos requisitos funcionais e das decisões tomadas durante a especificação da ferramenta.
 > Estas regras ainda devem ser revisadas e validadas com os orientadores.
@@ -15,6 +15,21 @@ Todo elemento arquitetural cadastrado deve estar associado a uma versão especí
 
 ### RN-RA-03 — Tipos de elementos podem ser predefinidos ou customizados
 Um elemento arquitetural pode utilizar um tipo disponibilizado pela ferramenta ou um tipo customizado criado por um usuário.
+
+### RN-RA-04 — Arquitetura de Referência possui proprietário e pode possuir colaboradores
+Cada Arquitetura de Referência deve possuir exatamente um usuário com papel `OWNER` e pode possuir zero ou mais usuários com papel `EDITOR`.
+
+### RN-RA-05 — Permissões de colaboração da Arquitetura de Referência
+O usuário `OWNER` pode gerenciar colaboradores e a visibilidade da Arquitetura de Referência.
+
+Usuários `OWNER` e `EDITOR` podem editar o conteúdo da RA, criar versões, cadastrar ou editar elementos arquiteturais, gerenciar imagens e cadastrar critérios de conformidade, respeitando as regras de versionamento e preservação histórica.
+
+### RN-RA-06 — Imagens da Arquitetura de Referência pertencem ao conteúdo versionado
+Imagens associadas à descrição geral da RA devem pertencer a uma versão específica da Arquitetura de Referência.
+
+Imagens associadas a elementos arquiteturais devem pertencer ao elemento correspondente, que por sua vez pertence a uma versão específica da RA.
+
+Alterações nas imagens de uma nova versão não devem modificar o conteúdo preservado de versões anteriores.
 
 ---
 
@@ -160,6 +175,21 @@ A criação de uma nova versão da arquitetura concreta ou da RA não deve trans
 ### RN-INS-07 — Elementos concretos possuem um tipo arquitetural
 Todo elemento de uma arquitetura concreta deve estar associado a um tipo arquitetural disponibilizado pela ferramenta ou criado por um usuário.
 
+### RN-INS-08 — Arquitetura concreta possui proprietário e pode possuir colaboradores
+Cada arquitetura concreta deve possuir exatamente um usuário com papel `OWNER` e pode possuir zero ou mais usuários com papel `EDITOR`.
+
+### RN-INS-09 — Permissões de colaboração da arquitetura concreta
+O usuário `OWNER` pode gerenciar os colaboradores da arquitetura concreta.
+
+Usuários `OWNER` e `EDITOR` podem editar o conteúdo da arquitetura concreta, criar versões, cadastrar ou editar elementos, gerenciar imagens e manter mapeamentos, respeitando as regras de versionamento e preservação histórica.
+
+### RN-INS-10 — Imagens da arquitetura concreta pertencem ao conteúdo versionado
+Imagens associadas à descrição geral da arquitetura concreta devem pertencer a uma versão específica da arquitetura concreta.
+
+Imagens associadas a elementos concretos devem pertencer ao elemento correspondente, que por sua vez pertence a uma versão específica da arquitetura concreta.
+
+Alterações nas imagens de uma nova versão não devem modificar o conteúdo preservado de versões anteriores.
+
 ---
 
 ## Conformidade
@@ -208,6 +238,29 @@ Uma avaliação de conformidade deve possuir um dos seguintes estados: `DRAFT`, 
 Um resultado de conformidade deve possuir um dos seguintes estados: `CONFORMING`, `NON_CONFORMING` ou `NOT_APPLICABLE`.
 
 Violações somente devem ser registradas para resultados classificados como `NON_CONFORMING`.
+
+### RN-CONF-12 — Evidências podem possuir imagens
+Uma evidência de conformidade pode possuir zero ou mais imagens anexadas, além de sua descrição e da URL externa opcional.
+
+### RN-CONF-13 — Violações podem possuir imagens
+Uma violação pode possuir zero ou mais imagens anexadas.
+
+As imagens de uma violação pertencem ao mesmo contexto da violação e, portanto, somente podem existir quando o resultado correspondente estiver classificado como `NON_CONFORMING`.
+
+---
+
+## Imagens e anexos
+
+### RN-IMG-01 — Imagem pertence a um único contexto
+No MVP, cada imagem anexada deve pertencer a um único contexto de conteúdo: versão da RA, elemento da RA, versão da arquitetura concreta, elemento concreto, evidência de conformidade ou violação.
+
+### RN-IMG-02 — Acesso à imagem acompanha o artefato associado
+O acesso a uma imagem deve respeitar as mesmas permissões de acesso do artefato, versão, elemento, evidência ou violação ao qual ela está associada.
+
+### RN-IMG-03 — Imagens complementam o conteúdo textual
+O suporte a imagens no MVP deve funcionar como anexo complementar ao conteúdo textual formatado.
+
+A edição visual avançada de imagens dentro do Markdown, incluindo posicionamento livre, redimensionamento ou composição gráfica, não faz parte do MVP.
 
 ---
 

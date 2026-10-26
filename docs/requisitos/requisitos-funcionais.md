@@ -1,4 +1,4 @@
-# Requisitos Funcionais — v0.1
+# Requisitos Funcionais — v0.2
 
 ## Arquiteturas de Referência
 
@@ -22,6 +22,15 @@ O sistema deve permitir utilizar tipos de elementos arquiteturais além dos tipo
 
 ### RF-RA-07 — Visualizar avaliações da Arquitetura de Referência
 O sistema deve permitir visualizar as avaliações por checklist e as avaliações de conformidade associadas às versões de uma Arquitetura de Referência.
+
+### RF-RA-08 — Gerenciar colaboradores da Arquitetura de Referência
+O sistema deve permitir ao proprietário de uma Arquitetura de Referência adicionar e remover usuários colaboradores com permissão de edição do artefato.
+
+### RF-RA-09 — Anexar imagens à versão da Arquitetura de Referência
+O sistema deve permitir anexar imagens à descrição de uma versão de Arquitetura de Referência.
+
+### RF-RA-10 — Anexar imagens a elementos da Arquitetura de Referência
+O sistema deve permitir anexar imagens aos elementos arquiteturais pertencentes a uma versão da Arquitetura de Referência.
 
 ---
 
@@ -123,6 +132,15 @@ O sistema deve permitir relacionar elementos de uma versão da arquitetura concr
 ### RF-INS-07 — Visualizar mapeamentos
 O sistema deve permitir visualizar os mapeamentos existentes entre os elementos da arquitetura concreta e os elementos da Arquitetura de Referência.
 
+### RF-INS-08 — Gerenciar colaboradores da arquitetura concreta
+O sistema deve permitir ao proprietário de uma arquitetura concreta adicionar e remover usuários colaboradores com permissão de edição do artefato.
+
+### RF-INS-09 — Anexar imagens à versão da arquitetura concreta
+O sistema deve permitir anexar imagens à descrição de uma versão de arquitetura concreta.
+
+### RF-INS-10 — Anexar imagens a elementos da arquitetura concreta
+O sistema deve permitir anexar imagens aos elementos arquiteturais pertencentes a uma versão da arquitetura concreta.
+
 ---
 
 ## Conformidade
@@ -147,6 +165,12 @@ O sistema deve permitir registrar violações identificadas durante a avaliaçã
 
 ### RF-CONF-07 — Visualizar resultados de conformidade
 O sistema deve permitir visualizar de forma consolidada os resultados e as violações identificadas em uma avaliação de conformidade.
+
+### RF-CONF-08 — Anexar imagens a evidências de conformidade
+O sistema deve permitir anexar imagens às evidências registradas para um resultado de conformidade.
+
+### RF-CONF-09 — Anexar imagens a violações
+O sistema deve permitir anexar imagens às violações registradas em uma avaliação de conformidade.
 
 ## Usuários e autenticação
 

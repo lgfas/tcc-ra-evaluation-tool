@@ -1,4 +1,4 @@
-# Modelo Entidade-Relacionamento — v0.1
+# Modelo Entidade-Relacionamento — v0.2
 
 > Modelo inicial derivado dos requisitos funcionais, regras de negócio e decisões de projeto da ferramenta.
 >
@@ -16,9 +16,15 @@ erDiagram
 
     REFERENCE_ARCHITECTURE {
         id id PK
-        id owner_user_id FK
         string name
         string visibility
+    }
+
+    REFERENCE_ARCHITECTURE_MEMBER {
+        id id PK
+        id reference_architecture_id FK
+        id user_id FK
+        string role
     }
 
     RA_VERSION {
@@ -41,6 +47,25 @@ erDiagram
         id element_type_id FK
         string name
         text description_markdown
+    }
+
+    IMAGE {
+        id id PK
+        id uploaded_by_user_id FK
+        string storage_key
+        string original_name
+        string content_type
+        datetime created_at
+    }
+
+    RA_VERSION_IMAGE {
+        id ra_version_id FK
+        id image_id FK
+    }
+
+    RA_ELEMENT_IMAGE {
+        id ra_element_id FK
+        id image_id FK
     }
 
     CHECKLIST {
@@ -126,8 +151,14 @@ erDiagram
 
     CONCRETE_ARCHITECTURE {
         id id PK
-        id owner_user_id FK
         string name
+    }
+
+    CONCRETE_ARCHITECTURE_MEMBER {
+        id id PK
+        id concrete_architecture_id FK
+        id user_id FK
+        string role
     }
 
     CONCRETE_ARCHITECTURE_VERSION {
@@ -145,6 +176,16 @@ erDiagram
         id element_type_id FK
         string name
         text description_markdown
+    }
+
+    CONCRETE_ARCHITECTURE_VERSION_IMAGE {
+        id concrete_architecture_version_id FK
+        id image_id FK
+    }
+
+    CONCRETE_ELEMENT_IMAGE {
+        id concrete_element_id FK
+        id image_id FK
     }
 
     ELEMENT_MAPPING {
@@ -188,10 +229,20 @@ erDiagram
         string external_url
     }
 
+    CONFORMANCE_EVIDENCE_IMAGE {
+        id conformance_evidence_id FK
+        id image_id FK
+    }
+
     VIOLATION {
         id id PK
         id conformance_result_id FK
         text description
+    }
+
+    VIOLATION_IMAGE {
+        id violation_id FK
+        id image_id FK
     }
 
     VIOLATION_RA_ELEMENT {
@@ -205,14 +256,23 @@ erDiagram
     }
 
 
-    USER ||--o{ REFERENCE_ARCHITECTURE : owns
+    USER ||--o{ REFERENCE_ARCHITECTURE_MEMBER : participates
+    REFERENCE_ARCHITECTURE ||--|{ REFERENCE_ARCHITECTURE_MEMBER : collaborators
+
     USER ||--o{ CHECKLIST : owns
-    USER ||--o{ CONCRETE_ARCHITECTURE : owns
+
+    USER ||--o{ CONCRETE_ARCHITECTURE_MEMBER : participates
+    CONCRETE_ARCHITECTURE ||--|{ CONCRETE_ARCHITECTURE_MEMBER : collaborators
 
     USER o|--o{ ARCHITECTURAL_ELEMENT_TYPE : creates
+    USER ||--o{ IMAGE : uploads
 
     REFERENCE_ARCHITECTURE ||--|{ RA_VERSION : has
     RA_VERSION ||--o{ RA_ELEMENT : contains
+    RA_VERSION ||--o{ RA_VERSION_IMAGE : has
+    RA_ELEMENT ||--o{ RA_ELEMENT_IMAGE : has
+    IMAGE ||--o{ RA_VERSION_IMAGE : attached
+    IMAGE ||--o{ RA_ELEMENT_IMAGE : attached
     ARCHITECTURAL_ELEMENT_TYPE ||--o{ RA_ELEMENT : classifies
     ARCHITECTURAL_ELEMENT_TYPE ||--o{ CONCRETE_ELEMENT : classifies
 
@@ -245,6 +305,10 @@ erDiagram
     CONCRETE_ARCHITECTURE ||--|{ CONCRETE_ARCHITECTURE_VERSION : has
     RA_VERSION ||--o{ CONCRETE_ARCHITECTURE_VERSION : basis_for
     CONCRETE_ARCHITECTURE_VERSION ||--o{ CONCRETE_ELEMENT : contains
+    CONCRETE_ARCHITECTURE_VERSION ||--o{ CONCRETE_ARCHITECTURE_VERSION_IMAGE : has
+    CONCRETE_ELEMENT ||--o{ CONCRETE_ELEMENT_IMAGE : has
+    IMAGE ||--o{ CONCRETE_ARCHITECTURE_VERSION_IMAGE : attached
+    IMAGE ||--o{ CONCRETE_ELEMENT_IMAGE : attached
 
     CONCRETE_ELEMENT ||--o{ ELEMENT_MAPPING : maps
     RA_ELEMENT ||--o{ ELEMENT_MAPPING : mapped_to
@@ -261,7 +325,12 @@ erDiagram
     CONFORMANCE_CRITERION ||--o{ CONFORMANCE_RESULT : evaluated_as
 
     CONFORMANCE_RESULT ||--o{ CONFORMANCE_EVIDENCE : supported_by
+    CONFORMANCE_EVIDENCE ||--o{ CONFORMANCE_EVIDENCE_IMAGE : has
+    IMAGE ||--o{ CONFORMANCE_EVIDENCE_IMAGE : attached
+
     CONFORMANCE_RESULT ||--o{ VIOLATION : may_generate
+    VIOLATION ||--o{ VIOLATION_IMAGE : has
+    IMAGE ||--o{ VIOLATION_IMAGE : attached
 
     VIOLATION ||--o{ VIOLATION_RA_ELEMENT : involves
     RA_ELEMENT ||--o{ VIOLATION_RA_ELEMENT : referenced_by
@@ -271,6 +340,22 @@ erDiagram
 ```
 
 ## Observações de modelagem
+
+### Colaboração
+
+`REFERENCE_ARCHITECTURE_MEMBER` e `CONCRETE_ARCHITECTURE_MEMBER` representam a participação de usuários na criação e edição colaborativa dos artefatos.
+
+Cada Arquitetura de Referência e cada arquitetura concreta deve possuir exatamente um membro com papel `OWNER` e pode possuir zero ou mais membros com papel `EDITOR`.
+
+O proprietário é representado pela própria associação de membership, evitando manter simultaneamente um `owner_user_id` redundante no artefato.
+
+### Imagens
+
+`IMAGE` armazena metadados e a referência necessária para recuperar o arquivo no mecanismo de armazenamento escolhido pela implementação.
+
+As tabelas de associação identificam o contexto ao qual a imagem pertence. No MVP, uma imagem deve estar vinculada a apenas um contexto entre versão da RA, elemento da RA, versão concreta, elemento concreto, evidência ou violação.
+
+Imagens da descrição geral de RAs e arquiteturas concretas são associadas às respectivas versões para preservar o histórico.
 
 ### Versionamento
 
