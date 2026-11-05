@@ -1,0 +1,7 @@
+Django==5.2.19
+djangorestframework==3.18.3
+psycopg[binary]==3.3.8
+python-dotenv==1.2.4
+# Dependências transitivas fixadas para reprodução do ambiente.
+asgiref==3.13.0
+sqlparse==0.6.1
