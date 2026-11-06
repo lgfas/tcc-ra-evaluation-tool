@@ -21,7 +21,10 @@ export default function AuthPage({ onLogin }: {onLogin: (user: User) => void}) {
     } catch (err) { setError(err instanceof Error ? err.message : 'Ocorreu um erro.'); }
     finally { setBusy(false); }
   }
-  return <section className="card"><h1>{register ? 'Criar conta' : 'Entrar'}</h1>
+  return <main className="auth-layout"><aside className="auth-intro"><div><strong className="brand">RA Eval</strong>
+    <h2>Avalie arquiteturas de referência de forma estruturada.</h2>
+    <p>Uma ferramenta de apoio à avaliação de Arquiteturas de Referência.</p></div></aside>
+    <div className="auth-content"><section className="card auth-card"><h1>{register ? 'Criar conta' : 'Entrar'}</h1>
     <p>{register ? 'Cadastre-se para acessar a ferramenta.' : 'Acesse sua conta para continuar.'}</p>
     {message && <Notice message={message} />}{error && <Notice message={error} error />}
     <form onSubmit={submit}>
@@ -31,7 +34,8 @@ export default function AuthPage({ onLogin }: {onLogin: (user: User) => void}) {
       {register && <small>Use ao menos 8 caracteres. Evite senhas comuns, apenas números ou semelhantes aos seus dados.</small>}
       <button disabled={busy}>{busy ? 'Aguarde…' : register ? 'Criar conta' : 'Entrar'}</button>
     </form>
+    <div className="divider"><span>ou</span></div>
     <button className="secondary" disabled={busy} onClick={() => {setRegister(!register); setError(''); setMessage('');}}>
       {register ? 'Voltar para login' : 'Criar uma conta'}</button>
-  </section>;
+  </section></div></main>;
 }

@@ -2,6 +2,10 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { api } from '../services/api';
 import Notice from '../components/Notice';
 import RAElements from '../components/RAElements';
+import PageHeader from '../components/PageHeader';
+import EmptyState from '../components/EmptyState';
+import StatCard from '../components/StatCard';
+import EditorPanel from '../components/EditorPanel';
 
 type Visibility = 'PRIVATE' | 'PUBLIC';
 interface Version { id: number; version: string; description_markdown: string; created_at: string }
@@ -33,10 +37,10 @@ export function ArchitectureCreate() {
       window.location.hash = `/reference-architectures/${result.id}`;
     } catch (err) { setError(message(err)); } finally { setBusy(false); }
   }
-  return <section className="card"><a href="#/reference-architectures">Voltar à listagem</a><h1>{step === 1 ? 'Nova Arquitetura de Referência' : 'Criar primeira versão'}</h1>
+  return <section className="page-stack form-page"><PageHeader title={step === 1 ? 'Nova Arquitetura de Referência' : 'Criar primeira versão'} eyebrow={<a href="#/reference-architectures">← Arquiteturas de Referência</a>} /><div className="card">
     <p>Etapa {step} de 2. O cadastro será salvo na confirmação final.</p>{error && <Notice message={error} error />}
     <form onSubmit={submit}><fieldset disabled={busy}>{step === 1 ? <Metadata name={name} visibility={visibility} onName={setName} onVisibility={setVisibility} /> : <><p>{name} · {visibility}</p><VersionFields version={version} description={description} onVersion={setVersion} onDescription={setDescription} /></>}</fieldset>
-      <div className="actions">{step === 2 && <button type="button" disabled={busy} className="secondary" onClick={() => {setStep(1); setError('');}}>Voltar</button>}<button disabled={busy}>{busy ? 'Salvando…' : step === 1 ? 'Continuar' : 'Confirmar criação'}</button></div></form></section>;
+      <div className="actions">{step === 2 && <button type="button" disabled={busy} className="secondary" onClick={() => {setStep(1); setError('');}}>Voltar</button>}<button disabled={busy}>{busy ? 'Salvando…' : step === 1 ? 'Continuar' : 'Confirmar criação'}</button></div></form></div></section>;
 }
 export function ArchitectureList() {
   const [items, setItems] = useState<Architecture[]>([]);
@@ -44,13 +48,18 @@ export function ArchitectureList() {
   const [error, setError] = useState('');
   async function load() { setLoading(true); setError(''); try {setItems(await api<Architecture[]>(base));} catch (err) {setError(message(err));} finally {setLoading(false);} }
   useEffect(() => {void load();}, []);
-  return <section className="card"><h1>Minhas Arquiteturas de Referência</h1><a className="button-link" href="#/reference-architectures/new">Criar Arquitetura de Referência</a>
-    {loading ? <p role="status">Carregando arquiteturas…</p> : error ? <><Notice message={error} error /><button onClick={load}>Tentar novamente</button></> : items.length === 0 ? <p>Você ainda não possui Arquiteturas de Referência. Crie sua primeira RA para começar.</p> : <ul className="ra-list">{items.map(item => <li key={item.id}><h2><a href={`#/reference-architectures/${item.id}`}>{item.name}</a></h2><p>{item.visibility} · {item.role} · {item.version_count} versão(ões)</p></li>)}</ul>}</section>;
+  return <section className="page-stack"><PageHeader title="Minhas Arquiteturas de Referência" eyebrow="Arquiteturas" actions={<a className="button-link" href="#/reference-architectures/new">+ Nova arquitetura</a>} />
+    {loading ? <p role="status">Carregando arquiteturas…</p> : error ? <><Notice message={error} error /><button onClick={load}>Tentar novamente</button></> : items.length === 0 ? <div className="card"><EmptyState title="Nenhuma arquitetura cadastrada"><p>Crie sua primeira RA para começar.</p><a href="#/reference-architectures/new">Criar Arquitetura de Referência</a></EmptyState></div> : <ul className="architecture-grid">{items.map(item => <li className="card" key={item.id}>
+      <span className="badge">{item.visibility === 'PUBLIC' ? 'Pública' : 'Privada'}</span><h2><a href={`#/reference-architectures/${item.id}`}>{item.name}</a></h2>
+      <p className="muted">{item.role === 'OWNER' ? 'Proprietário' : 'Colaborador'} · {item.version_count} versão(ões)</p><a href={`#/reference-architectures/${item.id}`}>Abrir arquitetura →</a></li>)}</ul>}
+  </section>;
 }
 export function ArchitectureDetail({id}: {id: number}) {
   const [architecture, setArchitecture] = useState<Architecture | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<'overview' | 'elements'>('overview');
+  const [elementCount, setElementCount] = useState<number | undefined>();
   const [mode, setMode] = useState<'read' | 'metadata' | 'version'>('read');
   const [name, setName] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('PRIVATE');
@@ -65,6 +74,16 @@ export function ArchitectureDetail({id}: {id: number}) {
     catch (err) {setError(message(err));} finally {setLoading(false);}
   }
   useEffect(() => {void load();}, [id]);
+  useEffect(() => {
+    let active = true;
+    setElementCount(undefined);
+    if (selected !== null) {
+      api<unknown[]>(`${base}${id}/versions/${selected}/elements/`)
+        .then(items => { if (active) setElementCount(items.length); })
+        .catch(() => { /* The elements area provides an error and retry when opened. */ });
+    }
+    return () => { active = false; };
+  }, [id, selected, tab]);
   async function submit(e: FormEvent) {
     e.preventDefault(); setBusy(true); setError(''); setSuccess('');
     try {
@@ -73,16 +92,60 @@ export function ArchitectureDetail({id}: {id: number}) {
         setSuccess('Dados da arquitetura atualizados.');
       } else {
         const result = await api<Version>(`${base}${id}/versions/`, 'POST', {version, description_markdown: description});
-        await load(); setSelected(result.id); setVersion(''); setDescription(''); setSuccess('Nova versão criada.');
+        setArchitecture(current => current ? {...current, versions: [result, ...current.versions], version_count: current.version_count + 1} : current);
+        setSelected(result.id); setVersion(''); setDescription(''); setSuccess('Nova versão criada.');
       }
       setMode('read');
     } catch (err) {setError(message(err));} finally {setBusy(false);}
   }
   const content = architecture?.versions.find(v => v.id === selected);
-  return <section className="card"><a href="#/reference-architectures">Voltar à listagem</a>{error && <Notice message={error} error />}{success && <Notice message={success} />}
-    {loading ? <p role="status">Carregando arquitetura…</p> : !architecture ? <button onClick={load}>Tentar novamente</button> : <><h1>{architecture.name}</h1><p>{architecture.visibility}{architecture.role && ` · ${architecture.role}`}</p>
-      {mode === 'read' ? <><div className="actions">{architecture.role === 'OWNER' && <button onClick={() => {setName(architecture.name); setVisibility(architecture.visibility); setMode('metadata'); setError(''); setSuccess('');}}>Alterar nome/visibilidade</button>}{architecture.role && <button onClick={() => {setMode('version'); setError(''); setSuccess('');}}>Criar nova versão</button>}</div>
-        <h2>Versões</h2><label>Versão selecionada<select value={selected ?? ''} onChange={e => setSelected(Number(e.target.value))}>{architecture.versions.map(v => <option key={v.id} value={v.id}>{v.version} — {new Date(v.created_at).toLocaleString('pt-BR')}</option>)}</select></label>
-        {content && <article><h2>Versão {content.version}</h2><p>Criada em {new Date(content.created_at).toLocaleString('pt-BR')}</p><pre className="markdown-text">{content.description_markdown}</pre><RAElements key={content.id} architectureId={id} versionId={content.id} canEdit={architecture.role === 'OWNER' || architecture.role === 'EDITOR'} /></article>}</> : <form onSubmit={submit}><h2>{mode === 'metadata' ? 'Alterar dados da RA' : 'Criar nova versão'}</h2><fieldset disabled={busy}>{mode === 'metadata' ? <Metadata name={name} visibility={visibility} onName={setName} onVisibility={setVisibility} /> : <VersionFields version={version} description={description} onVersion={setVersion} onDescription={setDescription} />}</fieldset><div className="actions"><button disabled={busy}>Salvar</button><button type="button" className="secondary" disabled={busy} onClick={() => {setMode('read'); setError('');}}>Cancelar</button></div></form>}</>}
+  function openEditor(next: 'metadata' | 'version') {
+    if (!architecture) return;
+    setName(architecture.name); setVisibility(architecture.visibility);
+    setVersion(''); setDescription(''); setMode(next); setError(''); setSuccess('');
+  }
+  const canEdit = architecture?.role === 'OWNER' || architecture?.role === 'EDITOR';
+  const unavailable = ['Critérios de conformidade', 'Avaliações por checklist', 'Instanciações', 'Conformidade'];
+  return <section className="page-stack">
+    {error && mode === 'read' && <Notice message={error} error />}{success && <Notice message={success} />}
+    {loading ? <p role="status">Carregando arquitetura…</p> : !architecture ? <><PageHeader title="Arquitetura indisponível" /><a href="#/reference-architectures">Voltar à listagem</a><button onClick={load}>Tentar novamente</button></> : <>
+      <PageHeader title={architecture.name} eyebrow={<a href="#/reference-architectures">Arquitetura de Referência</a>}
+        badge={<span className="badge">{architecture.visibility === 'PUBLIC' ? 'Pública' : 'Privada'}</span>}
+        actions={<>{architecture.role === 'OWNER' && <button className="secondary" onClick={() => openEditor('metadata')}>Alterar dados da RA</button>}
+          {canEdit && <button onClick={() => openEditor('version')}>+ Nova versão</button>}</>} />
+      <div className="metadata-row"><label className="version-selector"><span className="sr-only">Versão selecionada</span>
+        <select disabled={!architecture.versions.length} value={selected ?? ''} onChange={event => {setSelected(Number(event.target.value)); setSuccess('');}}>
+          {architecture.versions.map(item => <option key={item.id} value={item.id}>Versão {item.version}</option>)}
+        </select></label><span className="muted">{content && <>Criada em {new Date(content.created_at).toLocaleDateString('pt-BR')} · </>}
+          {architecture.role === 'OWNER' ? 'Proprietário' : architecture.role === 'EDITOR' ? 'Colaborador' : 'Consulta pública · Somente leitura'}</span></div>
+      <div className="tabs" role="tablist" aria-label="Áreas da arquitetura" onKeyDown={event => {
+        if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+          event.preventDefault();
+          const next = event.key === 'Home' ? 'overview' : event.key === 'End' ? 'elements' : tab === 'overview' ? 'elements' : 'overview';
+          setTab(next); document.getElementById(`tab-${next}`)?.focus();
+        }
+      }}>
+        <button role="tab" id="tab-overview" aria-selected={tab === 'overview'} aria-controls="panel-overview" tabIndex={tab === 'overview' ? 0 : -1} onClick={() => setTab('overview')}>Visão geral</button>
+        <button role="tab" id="tab-elements" aria-selected={tab === 'elements'} aria-controls="panel-elements" tabIndex={tab === 'elements' ? 0 : -1} onClick={() => setTab('elements')}>Elementos</button>
+        {unavailable.map(label => <button key={label} role="tab" aria-selected={false} disabled title="Ainda não disponível">{label}</button>)}
+      </div>
+      {!content ? <EmptyState title="Nenhuma versão disponível" /> : <>
+        <div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden={tab !== 'overview'} tabIndex={0} className="page-stack">
+          <article className="card"><h2>Descrição</h2><pre className="markdown-text">{content.description_markdown}</pre></article>
+          <h2>Resumo</h2><div className="stats-grid"><StatCard label="Elementos" value={elementCount} hint={elementCount === undefined ? 'Consulte a aba Elementos' : undefined} />
+            <StatCard label="Avaliações por checklist" hint="Ainda não disponível" /><StatCard label="Instanciações" hint="Ainda não disponível" /><StatCard label="Avaliações de conformidade" hint="Ainda não disponível" /></div>
+          <div className="panel-grid"><section className="card"><h2>Avaliações recentes</h2><EmptyState title="Ainda não disponível"><p>As avaliações serão adicionadas em uma próxima etapa.</p></EmptyState></section>
+            <section className="card"><h2>Arquiteturas concretas</h2><EmptyState title="Ainda não disponível"><p>As instanciações serão adicionadas em uma próxima etapa.</p></EmptyState></section></div>
+        </div>
+        <div role="tabpanel" id="panel-elements" aria-labelledby="tab-elements" hidden={tab !== 'elements'} tabIndex={0}>
+          {tab === 'elements' && <RAElements key={content.id} architectureId={id} versionId={content.id} canEdit={canEdit} />}
+        </div>
+      </>}
+      {mode !== 'read' && <EditorPanel title={mode === 'metadata' ? 'Alterar dados da RA' : 'Criar nova versão'} busy={busy} onClose={() => {setMode('read'); setError('');}}>
+        {error && <Notice message={error} error />}<form onSubmit={submit}><fieldset disabled={busy}>
+          {mode === 'metadata' ? <Metadata name={name} visibility={visibility} onName={setName} onVisibility={setVisibility} /> : <VersionFields version={version} description={description} onVersion={setVersion} onDescription={setDescription} />}
+        </fieldset><div className="actions form-actions"><button type="button" className="secondary" disabled={busy} onClick={() => {setMode('read'); setError('');}}>Cancelar</button><button disabled={busy}>{busy ? 'Salvando…' : 'Salvar'}</button></div></form>
+      </EditorPanel>}
+    </>}
   </section>;
 }
