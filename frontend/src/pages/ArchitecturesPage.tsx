@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { api } from '../services/api';
 import Notice from '../components/Notice';
+import RAElements from '../components/RAElements';
 
 type Visibility = 'PRIVATE' | 'PUBLIC';
 interface Version { id: number; version: string; description_markdown: string; created_at: string }
@@ -82,6 +83,6 @@ export function ArchitectureDetail({id}: {id: number}) {
     {loading ? <p role="status">Carregando arquitetura…</p> : !architecture ? <button onClick={load}>Tentar novamente</button> : <><h1>{architecture.name}</h1><p>{architecture.visibility}{architecture.role && ` · ${architecture.role}`}</p>
       {mode === 'read' ? <><div className="actions">{architecture.role === 'OWNER' && <button onClick={() => {setName(architecture.name); setVisibility(architecture.visibility); setMode('metadata'); setError(''); setSuccess('');}}>Alterar nome/visibilidade</button>}{architecture.role && <button onClick={() => {setMode('version'); setError(''); setSuccess('');}}>Criar nova versão</button>}</div>
         <h2>Versões</h2><label>Versão selecionada<select value={selected ?? ''} onChange={e => setSelected(Number(e.target.value))}>{architecture.versions.map(v => <option key={v.id} value={v.id}>{v.version} — {new Date(v.created_at).toLocaleString('pt-BR')}</option>)}</select></label>
-        {content && <article><h2>Versão {content.version}</h2><p>Criada em {new Date(content.created_at).toLocaleString('pt-BR')}</p><pre className="markdown-text">{content.description_markdown}</pre></article>}</> : <form onSubmit={submit}><h2>{mode === 'metadata' ? 'Alterar dados da RA' : 'Criar nova versão'}</h2><fieldset disabled={busy}>{mode === 'metadata' ? <Metadata name={name} visibility={visibility} onName={setName} onVisibility={setVisibility} /> : <VersionFields version={version} description={description} onVersion={setVersion} onDescription={setDescription} />}</fieldset><div className="actions"><button disabled={busy}>Salvar</button><button type="button" className="secondary" disabled={busy} onClick={() => {setMode('read'); setError('');}}>Cancelar</button></div></form>}</>}
+        {content && <article><h2>Versão {content.version}</h2><p>Criada em {new Date(content.created_at).toLocaleString('pt-BR')}</p><pre className="markdown-text">{content.description_markdown}</pre><RAElements key={content.id} architectureId={id} versionId={content.id} canEdit={architecture.role === 'OWNER' || architecture.role === 'EDITOR'} /></article>}</> : <form onSubmit={submit}><h2>{mode === 'metadata' ? 'Alterar dados da RA' : 'Criar nova versão'}</h2><fieldset disabled={busy}>{mode === 'metadata' ? <Metadata name={name} visibility={visibility} onName={setName} onVisibility={setVisibility} /> : <VersionFields version={version} description={description} onVersion={setVersion} onDescription={setDescription} />}</fieldset><div className="actions"><button disabled={busy}>Salvar</button><button type="button" className="secondary" disabled={busy} onClick={() => {setMode('read'); setError('');}}>Cancelar</button></div></form>}</>}
   </section>;
 }

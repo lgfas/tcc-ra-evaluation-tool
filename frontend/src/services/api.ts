@@ -6,7 +6,7 @@ function describeError(data: unknown): string {
   if (typeof data === 'string') return data;
   if (Array.isArray(data)) return data.map(describeError).join(' ');
   if (data && typeof data === 'object') {
-    const labels: Record<string, string> = { name: 'Nome', email: 'E-mail', password: 'Senha', visibility: 'Visibilidade', initial_version: 'Primeira versão', version: 'Versão', description_markdown: 'Descrição' };
+    const labels: Record<string, string> = { name: 'Nome', email: 'E-mail', password: 'Senha', visibility: 'Visibilidade', initial_version: 'Primeira versão', version: 'Versão', description_markdown: 'Descrição', element_type_id: 'Tipo arquitetural', ra_version: 'Versão do elemento', reference_architecture_id: 'Arquitetura' };
     return Object.entries(data).map(([key, value]) =>
       `${labels[key] ? labels[key] + ': ' : ''}${describeError(value)}`).join(' ');
   }

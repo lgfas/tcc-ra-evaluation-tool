@@ -7,7 +7,7 @@ A proposta atual combina:
 - avaliação conceitual da RA, apoiada por checklists e critérios da literatura;
 - avaliação prática por instanciação, registrando evidências e conformidade entre uma RA e arquiteturas concretas derivadas dela.
 
-A documentação acadêmica em `docs/` é a fonte de verdade e permanece preservada. Estão implementados a fundação executável, RF-USR-01/02/03 (cadastro, login e encerramento de sessão) e RA-01 (cadastro transacional de RAs, propriedade, versões e permissões). Elementos arquiteturais, checklists, avaliações e conformidade permanecem para entregas futuras.
+A documentação acadêmica em `docs/` é a fonte de verdade e permanece preservada. Estão implementados a fundação executável, RF-USR-01/02/03 (cadastro, login e encerramento de sessão) e RA-01 (cadastro transacional de RAs, propriedade, versões e permissões). RA-02 acrescenta elementos arquiteturais por versão e tipos customizados. Checklists, avaliações, imagens e conformidade permanecem para entregas futuras.
 
 ## Pré-requisitos e versões
 
@@ -261,3 +261,63 @@ Entre com esse usuário: a RA deve aparecer na listagem, permitir nova versão e
 Executadas em 05/11/2026: migrações aplicadas ao PostgreSQL 18.6 do Compose; `manage.py check` sem problemas; `makemigrations --check --dry-run` sem mudanças; 29 testes Django aprovados (16 de RAs e 13 de autenticação); `npm run typecheck` e `npm run build` aprovados. Execute a suíte a partir de `backend/`: a descoberta padrão partindo da raiz do repositório encontra zero testes. O frontend não possui suíte de testes configurada. A validação visual no navegador permanece manual.
 
 O ambiente disponível usa Python 3.14.7; as versões fixadas de Django e demais dependências foram mantidas. O `.env` local foi criado com os valores do exemplo para o banco e uma chave Django gerada; ele é ignorado pelo Git. O Compose encontrou seu volume ausente e inicializou um volume novo; o container preexistente `postgres_global` foi preservado. Nenhum banco/volume foi removido, e o Compose não foi alterado.
+
+
+## RA-02 — Elementos arquiteturais e tipos
+
+Os modelos `ArchitecturalElementType` e `RAElement` foram adicionados à app existente de RAs. Tipos possuem nome (até 255 caracteres) e criador opcional. O criador usa PROTECT: remover um usuário não deve transformar um tipo customizado em predefinido pela conversão do criador para NULL. Elementos possuem nome (até 255 caracteres), descrição Markdown, versão obrigatória (`related_name="elements"`, CASCADE) e tipo obrigatório (`related_name="ra_elements"`, PROTECT). Não há unicidade de nomes de elementos ou tipos.
+
+As migrações `0002_architecturalelementtype_raelement` e `0003_seed_element_types` acrescentam as duas tabelas e os tipos predefinidos **Componente** e **Conector**. São categorias genéricas iniciais, sem pretensão de taxonomia científica ou universal. A migração de dados usa get_or_create com criador NULL, é idempotente e sua reversão não apaga tipos que possam estar em uso. Não altera tabelas da RA-01.
+
+### API de elementos e tipos
+
+| Método | Endpoint | Resultado |
+| --- | --- | --- |
+| GET | `/api/reference-architectures/{ra_id}/versions/{version_id}/elements/` | Array dos elementos da versão |
+| POST | mesmo caminho | Cria elemento; 201 |
+| GET | caminho anterior + `{element_id}/` | Consulta elemento; 200 |
+| PATCH | caminho anterior + `{element_id}/` | Altera nome, tipo ou descrição; 200 |
+| GET | `/api/architectural-element-types/` | Array de tipos predefinidos e próprios |
+| GET | `/api/architectural-element-types/?reference_architecture_id={ra_id}` | Inclui tipos já usados na RA, quando o usuário é membro |
+| POST | `/api/architectural-element-types/` | Cria tipo com o usuário da sessão; 201 |
+
+Exemplo de criação de elemento:
+
+```json
+{"name":"API Backend","element_type_id":1,"description_markdown":"## Responsabilidade\nDisponibilizar serviços."}
+```
+
+Resposta (IDs ilustrativos):
+
+```json
+{"id":1,"name":"API Backend","description_markdown":"## Responsabilidade\nDisponibilizar serviços.","element_type":{"id":1,"name":"Componente"}}
+```
+
+PATCH aceita qualquer subconjunto dos três campos de entrada. `ra_version` e `ra_version_id` são rejeitados; a associação vem exclusivamente da URL na criação e permanece fixa na edição. O elemento é sempre buscado dentro da versão, que é buscada dentro da RA acessível. IDs incompatíveis e RAs privadas inacessíveis retornam 404. Usuários externos em RAs públicas podem ler, mas suas escritas retornam 403. Todas as operações exigem sessão; escritas exigem CSRF. A listagem de elementos usa select_related para obter os tipos sem consultas por elemento.
+
+Para criar tipo, envie `{"name":"Serviço"}`. A resposta contém apenas `id` e `name`; o backend fixa o criador na sessão, ignorando tentativas de informar criador arbitrário, inclusive NULL. Não há endpoints de exclusão ou renomeação global.
+
+### Política provisória dos tipos
+
+Esta é uma decisão de implementação, não uma regra da literatura: cada usuário pode selecionar tipos predefinidos e próprios. Membros de uma RA também podem selecionar tipos já associados a elementos de qualquer versão daquela RA. Esse acesso contextual não libera a seleção em outras RAs nem expõe o catálogo privado do criador. A consulta pública dos elementos mostra ID e nome de seu tipo, sem dados pessoais do criador; ela não amplia a lista de tipos selecionáveis do visitante. O filtro contextual verifica primeiro o acesso à RA.
+
+### Interface e integridade histórica
+
+T08 está integrada à versão selecionada nos detalhes da RA. T09 permite adicionar/editar elementos e criar um tipo sem sair do formulário; nome e descrição preenchidos são mantidos, e o novo tipo é selecionado automaticamente. A troca de versão remonta a seção e descarta o formulário ainda não salvo. Respostas de carregamentos anteriores são ignoradas após desmontagem para evitar mistura entre versões. Markdown continua exibido como texto, sem interpretar HTML. A navegação por hash e as dependências do frontend foram preservadas.
+
+Criação e edição são centralizadas em `create_element` e `update_element` nos serviços, com transação e verificação do papel. **O bloqueio de versões utilizadas em avaliações ainda não está implementado nem pode ser validado de ponta a ponta**: as entidades de avaliação não existem. Essas operações são os pontos para integrar a futura proteção, sem uma verificação artificial de editabilidade. No estado atual, membros podem editar elementos de versões existentes. Criar uma versão continua sem copiar elementos.
+
+### Validação manual da RA-02
+
+1. Inicie o backend e o frontend conforme as instruções anteriores, entre e abra uma RA.
+2. Selecione uma versão e confira o estado vazio em **Elementos**. Adicione um elemento usando **Componente**, nome e descrição Markdown; confira o resultado.
+3. Edite nome, tipo e descrição. Inclua texto com `<script>`: ele deve aparecer como texto, sem execução.
+4. Abra outro cadastro, preencha nome/descrição e use **Criar novo tipo**. Salve o tipo e confira a seleção automática e a preservação dos demais campos. Salve o elemento. Teste cancelar e erros de validação.
+5. Crie uma nova versão: sua lista deve estar vazia. Adicione um elemento nela; volte à primeira versão e confira que seu conteúdo permanece intacto.
+6. Com um EDITOR associado conforme o roteiro da RA-01, confira criação/edição e reutilização dos tipos já usados pelo proprietário na RA.
+7. Torne a RA pública e consulte seu URL com outra conta: nomes dos tipos e descrições devem aparecer, sem botões de adicionar/editar. A mesma conta não pode abrir uma RA privada.
+8. Recarregue a página e confira a sessão, navegação por hash e funcionalidades anteriores.
+
+### Verificações da RA-02
+
+Executadas em 05/11/2026: as duas migrações foram aplicadas ao PostgreSQL existente sem remover registros; `check` sem problemas; `makemigrations --check --dry-run` sem mudanças. A suíte completa, executada em `backend/` com `.venv/bin/python manage.py test`, aprovou **52 testes**: 23 de elementos/tipos, 16 de RA-01 e 13 de autenticação. Inclui permissões, CSRF, IDs incompatíveis, disponibilidade contextual, seed idempotente, preservação de Markdown e isolamento entre versões. `npm run typecheck`, `npm run build` e `git diff --check` passaram. Não há suíte frontend configurada e não foi realizada validação visual no navegador.
