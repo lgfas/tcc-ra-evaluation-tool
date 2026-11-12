@@ -9,9 +9,15 @@ class VersionInputSerializer(serializers.Serializer):
 
 
 class VersionSerializer(serializers.ModelSerializer):
+    is_frozen = serializers.SerializerMethodField()
+
+    def get_is_frozen(self, obj):
+        from apps.version_protection import version_is_frozen
+        return version_is_frozen(ra_version_id=obj.pk)
+
     class Meta:
         model = RAVersion
-        fields = ['id', 'version', 'description_markdown', 'created_at']
+        fields = ['id', 'version', 'description_markdown', 'created_at', 'is_frozen']
         read_only_fields = fields
 
 

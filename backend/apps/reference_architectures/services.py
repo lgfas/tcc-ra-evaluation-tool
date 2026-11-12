@@ -2,6 +2,7 @@ from django.db import IntegrityError, transaction
 from rest_framework.exceptions import ValidationError
 from .models import ReferenceArchitecture, ReferenceArchitectureMember, RAVersion, RAElement
 from .permissions import require_role
+from apps.version_protection import require_editable_version
 
 
 @transaction.atomic
@@ -23,16 +24,23 @@ def create_version(*, architecture, **data):
         raise
 
 
+def writable_version(*, user, version):
+    version = RAVersion.objects.select_for_update(of=('self',)).select_related('reference_architecture').get(pk=version.pk)
+    require_role(version.reference_architecture, user)
+    require_editable_version(ra_version_id=version.pk)
+    return version
+
+
 @transaction.atomic
 def create_element(*, user, version, data):
-    # Future evaluation-based content protection belongs here and in update_element.
-    require_role(version.reference_architecture, user)
+    version = writable_version(user=user, version=version)
     return RAElement.objects.create(ra_version=version, **data)
 
 
 @transaction.atomic
 def update_element(*, user, element, data):
-    require_role(element.ra_version.reference_architecture, user)
+    version = writable_version(user=user, version=element.ra_version)
+    element = RAElement.objects.get(pk=element.pk, ra_version=version)
     for field in ('name', 'element_type', 'description_markdown'):
         if field in data:
             setattr(element, field, data[field])

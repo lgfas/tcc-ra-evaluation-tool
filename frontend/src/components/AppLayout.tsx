@@ -3,7 +3,7 @@ import { api, ApiError, type User } from '../services/api';
 import Notice from './Notice';
 import navDot from '../assets/nav-dot.svg';
 
-const pending = ['Avaliações', 'Arq. Concretas', 'Catálogo'];
+const pending = ['Arq. Concretas', 'Catálogo'];
 export default function AppLayout({ user, route, onLogout, children }: {
   user: User; route: string; onLogout: () => void; children: ReactNode;
 }) {
@@ -48,6 +48,7 @@ export default function AppLayout({ user, route, onLogout, children }: {
         <a href="#/" aria-current={route === '/' ? 'page' : undefined}><img src={navDot} alt="" />Início</a>
         <a href="#/reference-architectures" aria-current={architectures ? 'page' : undefined}><img src={navDot} alt="" />Arquiteturas</a>
         <a href="#/checklists" aria-current={route.startsWith('/checklists') ? 'page' : undefined}><img src={navDot} alt="" />Checklists</a>
+        <a href="#/evaluations" aria-current={route.startsWith('/evaluations') ? 'page' : undefined}><img src={navDot} alt="" />Avaliações</a>
         {pending.map(label => <span key={label} className="nav-unavailable" aria-disabled="true" title="Ainda não disponível"><img src={navDot} alt="" />{label}<small className="sr-only">Ainda não disponível</small></span>)}
       </nav>
       <div className="sidebar-account"><p className="eyebrow">Conta do usuário</p><strong>{user.name}</strong><span>{user.email}</span>

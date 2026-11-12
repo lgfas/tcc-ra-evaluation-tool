@@ -113,7 +113,8 @@ export function ChecklistDetail({ id }: {id: number}) {
     <div className="metadata-row"><label className="version-selector"><span className="sr-only">Versão selecionada</span><select value={selected ?? ''} onChange={event => {setSelected(Number(event.target.value)); setSuccess('');}}>
       {checklist.versions.map(version => <option key={version.id} value={version.id}>Versão {version.version}</option>)}</select></label><p className="muted checklist-origin">Origem: {checklist.origin || 'Não informada'}</p></div>
     {!checklist.can_edit && <p className="muted">Consulta pública · Somente leitura</p>}{success && <Notice message={success} />}
-    {selected !== null ? <ChecklistStructure key={selected} path={`${base}${id}/versions/${selected}/`} canEdit={checklist.can_edit} /> : <EmptyState title="Nenhuma versão disponível" />}
+    {checklist.versions.find(version => version.id === selected)?.is_frozen && <p className="preservation-note">Esta versão está preservada por uma avaliação iniciada ou concluída. Crie uma nova versão para alterar sua estrutura.</p>}
+    {selected !== null ? <ChecklistStructure key={selected} path={`${base}${id}/versions/${selected}/`} canEdit={checklist.can_edit && !checklist.versions.find(version => version.id === selected)?.is_frozen} /> : <EmptyState title="Nenhuma versão disponível" />}
     {checklist.can_edit && editor === 'metadata' && <MetadataEditor checklist={checklist} onClose={() => setEditor(null)} onSaved={next => {setChecklist(next); setEditor(null); setSuccess('Dados da checklist atualizados.');}} />}
     {checklist.can_edit && editor === 'version' && <VersionEditor checklist={checklist} onClose={() => setEditor(null)} onSaved={version => {
       setChecklist(current => current ? {...current, versions:[version, ...current.versions], version_count:current.version_count + 1} : current);

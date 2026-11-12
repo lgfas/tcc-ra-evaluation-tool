@@ -176,3 +176,40 @@ textarea { resize: vertical; min-height: 140px; }
   .question-card { grid-template-columns: minmax(0, 1fr); }
   .question-card > .actions { grid-column: 1; grid-row: auto; flex-wrap: wrap; }
 }
+
+/* AVA-01: W05 uses the shared shell, cards and editor panels. */
+.evaluation-columns { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+.evaluation-columns.participant-context { grid-template-columns: minmax(0, 1fr); }
+.evaluation-summary { background: var(--subtle); }
+.evaluation-page dl { margin: 0; }
+.evaluation-page dt { color: var(--muted); font-size: 14px; margin-bottom: 4px; }
+.evaluation-page dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.evaluation-summary dl { display: grid; gap: 16px; }
+.evaluation-summary button { width: 100%; }
+.artifact-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+.evaluation-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding: 0; margin: 0; list-style: none; }
+.evaluation-steps button { border: 0; padding: 0; background: transparent; font-weight: 400; gap: 8px; }
+.evaluation-steps button span { border-radius: var(--radius); background: var(--subtle); display: grid; place-items: center; width: 28px; height: 28px; color: var(--muted); font-size: 14px; }
+.evaluation-steps button[aria-current] { font-weight: 600; }
+.evaluation-steps button[aria-current] span { background: var(--brand); color: white; }
+.evaluation-participants { display: grid; gap: 16px; list-style: none; padding: 0; margin: 0; }
+.participant-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; min-height: 82px; padding: 12px 16px; }
+.participant-avatar { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; background: var(--subtle); border-radius: var(--radius); font-weight: 600; }
+.participant-identity { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.participant-identity small { overflow-wrap: anywhere; }
+.participant-roles { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 100%; }
+.participant-roles .badge { padding: 4px 8px; font-size: 12px; }
+.participant-row .actions { width: 100%; justify-content: flex-end; }
+.participant-row .actions button { min-height: 32px; padding: 4px 12px; font-size: 14px; }
+.preservation-note { background: var(--subtle); border-radius: var(--radius); padding: 12px 16px; color: var(--muted); font-size: 14px; }
+.preservation-note h3 { margin-bottom: 4px; color: var(--brand); }
+.evaluation-selection { min-width: 0; }
+@media (max-width: 1100px) {
+  .evaluation-columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .artifact-pair { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .evaluation-steps { gap: 12px; }
+  .evaluation-steps button { font-size: 14px; gap: 4px; }
+  .participant-roles { width: 100%; justify-content: flex-start; }
+}

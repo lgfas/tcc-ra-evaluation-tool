@@ -1,4 +1,4 @@
-export interface ChecklistVersion { id: number; version: string; created_at: string }
+export interface ChecklistVersion { id: number; version: string; created_at: string; is_frozen: boolean }
 export interface ChecklistSummary {
   id: number; name: string; origin: string; visibility: 'PRIVATE' | 'PUBLIC';
   owner_user: number; can_edit: boolean; version_count: number;

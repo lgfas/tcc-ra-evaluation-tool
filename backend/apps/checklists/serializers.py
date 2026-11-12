@@ -65,9 +65,15 @@ class ReorderInput(StrictInputSerializer):
 
 
 class VersionSerializer(serializers.ModelSerializer):
+    is_frozen = serializers.SerializerMethodField()
+
+    def get_is_frozen(self, obj):
+        from apps.version_protection import version_is_frozen
+        return version_is_frozen(checklist_version_id=obj.pk)
+
     class Meta:
         model = ChecklistVersion
-        fields = ['id', 'version', 'created_at']
+        fields = ['id', 'version', 'created_at', 'is_frozen']
 
 
 class ChecklistSerializer(serializers.ModelSerializer):

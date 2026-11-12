@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, ApiError, type User } from './services/api';
 import { ChecklistList, ChecklistCreate, ChecklistDetail } from './pages/ChecklistsPage';
+import { EvaluationList, EvaluationCreate, EvaluationDetail } from './pages/EvaluationsPage';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import Notice from './components/Notice';
@@ -9,6 +10,8 @@ import { ArchitectureList, ArchitectureCreate, ArchitectureDetail } from './page
 export default function App() {
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   useEffect(() => { const change = () => setRoute(window.location.hash.slice(1) || '/'); window.addEventListener('hashchange', change); return () => window.removeEventListener('hashchange', change); }, []);
+  const [path, query = ''] = route.split('?');
+  const evaluationDetail = /^\/evaluations\/(\d+)$/.exec(path);
   const checklistDetail = /^\/checklists\/(\d+)$/.exec(route);
   const detail = /^\/reference-architectures\/(\d+)$/.exec(route);
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +31,9 @@ export default function App() {
     {route === '/' ? <HomePage user={user} />
       : route === '/reference-architectures' ? <ArchitectureList />
       : route === '/reference-architectures/new' ? <ArchitectureCreate />
+      : path === '/evaluations' ? <EvaluationList />
+      : path === '/evaluations/new' ? <EvaluationCreate key={route} initialRaVersionId={Number(new URLSearchParams(query).get('ra_version_id')) || 0} />
+      : evaluationDetail ? <EvaluationDetail key={evaluationDetail[1]} id={Number(evaluationDetail[1])} />
       : route === '/checklists' ? <ChecklistList />
       : route === '/checklists/new' ? <ChecklistCreate />
       : checklistDetail ? <ChecklistDetail key={checklistDetail[1]} id={Number(checklistDetail[1])} />

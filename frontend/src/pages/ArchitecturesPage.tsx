@@ -8,7 +8,7 @@ import StatCard from '../components/StatCard';
 import EditorPanel from '../components/EditorPanel';
 
 type Visibility = 'PRIVATE' | 'PUBLIC';
-interface Version { id: number; version: string; description_markdown: string; created_at: string }
+interface Version { id: number; version: string; description_markdown: string; created_at: string; is_frozen: boolean }
 interface Architecture { id: number; name: string; visibility: Visibility; role: 'OWNER' | 'EDITOR' | null; version_count: number; versions: Version[] }
 const base = '/reference-architectures/';
 const message = (error: unknown) => error instanceof Error ? error.message : 'Não foi possível concluir a operação.';
@@ -112,12 +112,14 @@ export function ArchitectureDetail({id}: {id: number}) {
       <PageHeader title={architecture.name} eyebrow={<a href="#/reference-architectures">Arquitetura de Referência</a>}
         badge={<span className="badge">{architecture.visibility === 'PUBLIC' ? 'Pública' : 'Privada'}</span>}
         actions={<>{architecture.role === 'OWNER' && <button className="secondary" onClick={() => openEditor('metadata')}>Alterar dados da RA</button>}
-          {canEdit && <button onClick={() => openEditor('version')}>+ Nova versão</button>}</>} />
+          {canEdit && <button onClick={() => openEditor('version')}>+ Nova versão</button>}
+          {content && <a className="button-link" href={`#/evaluations/new?ra_version_id=${content.id}`}>Criar avaliação por checklist</a>}</>} />
       <div className="metadata-row"><label className="version-selector"><span className="sr-only">Versão selecionada</span>
         <select disabled={!architecture.versions.length} value={selected ?? ''} onChange={event => {setSelected(Number(event.target.value)); setSuccess('');}}>
           {architecture.versions.map(item => <option key={item.id} value={item.id}>Versão {item.version}</option>)}
         </select></label><span className="muted">{content && <>Criada em {new Date(content.created_at).toLocaleDateString('pt-BR')} · </>}
           {architecture.role === 'OWNER' ? 'Proprietário' : architecture.role === 'EDITOR' ? 'Colaborador' : 'Consulta pública · Somente leitura'}</span></div>
+      {content?.is_frozen && <p className="preservation-note">Esta versão está preservada por uma avaliação iniciada ou concluída. Crie uma nova versão para alterar seu conteúdo.</p>}
       <div className="tabs" role="tablist" aria-label="Áreas da arquitetura" onKeyDown={event => {
         if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
           event.preventDefault();
@@ -133,12 +135,12 @@ export function ArchitectureDetail({id}: {id: number}) {
         <div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden={tab !== 'overview'} tabIndex={0} className="page-stack">
           <article className="card"><h2>Descrição</h2><pre className="markdown-text">{content.description_markdown}</pre></article>
           <h2>Resumo</h2><div className="stats-grid"><StatCard label="Elementos" value={elementCount} hint={elementCount === undefined ? 'Consulte a aba Elementos' : undefined} />
-            <StatCard label="Avaliações por checklist" hint="Ainda não disponível" /><StatCard label="Instanciações" hint="Ainda não disponível" /><StatCard label="Avaliações de conformidade" hint="Ainda não disponível" /></div>
-          <div className="panel-grid"><section className="card"><h2>Avaliações recentes</h2><EmptyState title="Ainda não disponível"><p>As avaliações serão adicionadas em uma próxima etapa.</p></EmptyState></section>
+            <StatCard label="Avaliações por checklist" hint="Consulte Minhas Avaliações" /><StatCard label="Instanciações" hint="Ainda não disponível" /><StatCard label="Avaliações de conformidade" hint="Ainda não disponível" /></div>
+          <div className="panel-grid"><section className="card"><h2>Avaliações por checklist</h2><EmptyState title="Consulte suas avaliações"><p>As avaliações que você criou ou das quais participa estão na sua área de avaliações.</p><a href="#/evaluations">Abrir Minhas Avaliações</a></EmptyState></section>
             <section className="card"><h2>Arquiteturas concretas</h2><EmptyState title="Ainda não disponível"><p>As instanciações serão adicionadas em uma próxima etapa.</p></EmptyState></section></div>
         </div>
         <div role="tabpanel" id="panel-elements" aria-labelledby="tab-elements" hidden={tab !== 'elements'} tabIndex={0}>
-          {tab === 'elements' && <RAElements key={content.id} architectureId={id} versionId={content.id} canEdit={canEdit} />}
+          {tab === 'elements' && <RAElements key={content.id} architectureId={id} versionId={content.id} canEdit={canEdit && !content.is_frozen} />}
         </div>
       </>}
       {mode !== 'read' && <EditorPanel title={mode === 'metadata' ? 'Alterar dados da RA' : 'Criar nova versão'} busy={busy} onClose={() => {setMode('read'); setError('');}}>

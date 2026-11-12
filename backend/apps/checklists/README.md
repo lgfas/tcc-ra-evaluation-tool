@@ -103,9 +103,9 @@ Questão de seleção (rótulos livres; nenhuma escala predefinida):
 
 **Novas versões começam vazias**, sem copiar seções, stakeholders ou questões. Essa é a decisão provisória autorizada para CHK-01; o Fluxo 02 ainda a registra como aberta e não houve validação presumida com orientadores.
 
-**A preservação histórica de versões usadas em avaliações não está integralmente implementada.** Não existem entidades de avaliação nesta etapa. Todas as escritas estruturais passam por `services.writable_version`, onde a futura checagem de utilização deverá ser integrada. Não foi criado um estado LOCKED nem modelo fictício de avaliação. O futuro módulo também deverá coordenar o início de avaliações com o bloqueio da versão para evitar concorrência entre edição e utilização.
+**Atualização AVA-01:** versões usadas por avaliações IN_PROGRESS ou COMPLETED agora têm suas escritas estruturais bloqueadas em `services.writable_version`. O início da avaliação e as escritas sincronizam a mesma linha de versão com `select_for_update`; avaliações DRAFT não congelam o conteúdo. Não há campo LOCKED redundante. Metadados gerais e criação de novas versões continuam permitidos. Consulte a estratégia e os testes concorrentes no [README de AVA-01](../checklist_evaluations/README.md).
 
-RF-CAT-02 e consulta pública somente leitura estão implementados. RF-CAT-04/RN-CAT-02, relativos à reutilização em avaliações, dependem do módulo futuro e não são declarados concluídos. Derivação e catálogo continuam fora de escopo.
+RF-CAT-02 e consulta pública somente leitura estão implementados. AVA-01 acrescentou a seleção de versões públicas para criar e iniciar avaliações, sem conceder edição ao usuário que as reutiliza. Respostas, derivação e catálogo continuam fora de escopo.
 
 ## Revisão visual e manual
 

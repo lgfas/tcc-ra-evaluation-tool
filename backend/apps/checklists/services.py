@@ -5,13 +5,11 @@ from .permissions import require_owner
 
 
 def writable_version(*, version, user):
-    """All structural writes lock this row, serializing ordering and nested updates.
-
-    Future evaluation usage checks must be added here before allowing any write.
-    No evaluation entities exist yet; historical locking is not implemented.
-    """
-    version = ChecklistVersion.objects.select_for_update().select_related('checklist').get(pk=version.pk)
+    """Lock the version before checking usage and before any structural mutation."""
+    from apps.version_protection import require_editable_version
+    version = ChecklistVersion.objects.select_for_update(of=('self',)).select_related('checklist').get(pk=version.pk)
     require_owner(version.checklist, user)
+    require_editable_version(checklist_version_id=version.pk)
     return version
 
 
