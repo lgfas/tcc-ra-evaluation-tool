@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, ApiError, type User } from './services/api';
+import { ChecklistList, ChecklistCreate, ChecklistDetail } from './pages/ChecklistsPage';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import Notice from './components/Notice';
@@ -8,6 +9,7 @@ import { ArchitectureList, ArchitectureCreate, ArchitectureDetail } from './page
 export default function App() {
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   useEffect(() => { const change = () => setRoute(window.location.hash.slice(1) || '/'); window.addEventListener('hashchange', change); return () => window.removeEventListener('hashchange', change); }, []);
+  const checklistDetail = /^\/checklists\/(\d+)$/.exec(route);
   const detail = /^\/reference-architectures\/(\d+)$/.exec(route);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,9 @@ export default function App() {
     {route === '/' ? <HomePage user={user} />
       : route === '/reference-architectures' ? <ArchitectureList />
       : route === '/reference-architectures/new' ? <ArchitectureCreate />
+      : route === '/checklists' ? <ChecklistList />
+      : route === '/checklists/new' ? <ChecklistCreate />
+      : checklistDetail ? <ChecklistDetail key={checklistDetail[1]} id={Number(checklistDetail[1])} />
       : detail ? <ArchitectureDetail key={detail[1]} id={Number(detail[1])} />
       : <section className="card"><h1>Página não encontrada</h1><a href="#/">Voltar ao início</a></section>}
   </AppLayout>;

@@ -139,3 +139,40 @@ textarea { resize: vertical; min-height: 140px; }
   .auth-content { padding: 24px 16px; }
   .auth-card { padding: 24px; }
 }
+
+/* CHK-01: uses the UI-01 shell, panels and tokens, following W04. */
+.checklist-page, .checklist-structure { gap: 16px; }
+.checklist-origin { max-width: 70%; white-space: pre-wrap; }
+.question-group { display: grid; gap: 8px; }
+.question-group > .empty-state { padding: 8px 0 16px; }
+.question-list, .structure-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.question-card { padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; min-height: 120px; }
+.question-card h4 { margin: 0; font-size: 16px; font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
+.question-card p, .question-card details { font-size: 14px; }
+.question-card summary { cursor: pointer; color: var(--muted); }
+.question-card > h4, .question-card > p, .question-card > details { grid-column: 1; }
+.question-card > .actions { grid-column: 2; grid-row: 1 / span 4; align-self: start; }
+.question-card .actions button { min-height: 32px; padding: 4px 12px; font-size: 14px; }
+.question-card .move-controls button { width: 32px; padding: 4px; }
+.move-controls { display: inline-flex; gap: 4px; }
+.move-controls button { width: 40px; padding: 4px; }
+.structure-list .card { display: grid; gap: 12px; justify-items: start; }
+.preserve-lines { white-space: pre-wrap; }
+.question-form textarea { min-height: 92px; }
+.options-editor, .stakeholder-choices { border-top: 1px solid var(--border); padding-top: 12px; }
+.options-editor legend, .stakeholder-choices legend { padding-right: 8px; font-size: 14px; }
+.options-editor ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.options-editor li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.options-editor .actions { justify-content: flex-end; flex-wrap: nowrap; gap: 4px; }
+.options-editor .actions button { min-height: 32px; width: 32px; padding: 0; }
+.options-editor button { font-size: 14px; }
+.option-preview { margin-top: 8px; }
+.checkbox-row { flex-direction: row; align-items: center; gap: 8px; }
+.checkbox-row input { width: 16px; min-height: 16px; flex: 0 0 16px; margin: 0; accent-color: var(--brand); }
+@media (max-width: 720px) {
+  .checklist-origin { max-width: 100%; }
+  .checklist-structure .tabs { gap: 0; }
+  .checklist-structure .tabs button { padding-inline: 12px; }
+  .question-card { grid-template-columns: minmax(0, 1fr); }
+  .question-card > .actions { grid-column: 1; grid-row: auto; flex-wrap: wrap; }
+}
