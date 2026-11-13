@@ -102,3 +102,31 @@ class ChoicesView(APIView):
                     'versions': [{'id': version.pk, 'version': version.version} for version in item.versions.all()]}
         return Response({'architectures': [selection(item) for item in architectures],
                          'checklists': [selection(item) for item in checklists]})
+
+
+class MyQuestionsView(APIView):
+    def get(self, request, pk):
+        from .models import Answer
+        from .permissions import participant_for, require_in_progress, available_questions
+
+        participant = participant_for(request.user, pk)
+        evaluation = participant.checklist_evaluation
+        require_in_progress(evaluation)
+        questions = list(available_questions(participant).select_related('section').prefetch_related(
+            'options', Prefetch('answers', queryset=Answer.objects.filter(evaluation_participant=participant), to_attr='own_answers')))
+        return Response({
+            'evaluation': {'id': evaluation.pk, 'status': evaluation.status,
+                'ra_version': {'version': evaluation.ra_version.version, 'architecture_name': evaluation.ra_version.reference_architecture.name},
+                'checklist_version': {'version': evaluation.checklist_version.version, 'checklist_name': evaluation.checklist_version.checklist.name}},
+            'participant': {'name': request.user.name, 'stakeholder_roles': schema.RoleSerializer(participant.stakeholder_roles.all(), many=True).data},
+            'questions': schema.MyQuestionSerializer(questions, many=True).data,
+            'progress': {'answered': sum(bool(question.own_answers) for question in questions), 'total': len(questions)},
+        })
+
+
+class MyAnswerView(APIView):
+    def put(self, request, pk, question_id):
+        serializer = schema.AnswerInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        answer = services.save_answer(user=request.user, evaluation_id=pk, question_id=question_id, data=serializer.validated_data)
+        return Response(schema.AnswerSerializer(answer).data)

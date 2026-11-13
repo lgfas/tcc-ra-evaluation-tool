@@ -129,3 +129,35 @@ def start_evaluation(*, user, evaluation):
     evaluation.status = ChecklistEvaluation.Status.IN_PROGRESS
     evaluation.save(update_fields=['status'])
     return evaluation
+
+
+@transaction.atomic
+def save_answer(*, user, evaluation_id, question_id, data):
+    from django.core.exceptions import ValidationError as ModelValidationError
+    from apps.checklists.models import ResponseOption
+    from .models import Answer
+    from .permissions import participant_for, require_in_progress, available_questions
+
+    # Check participation before locking; re-resolve it after any concurrent configuration commits.
+    participant_for(user, evaluation_id)
+    evaluation = ChecklistEvaluation.objects.select_for_update(of=('self',)).get(pk=evaluation_id)
+    participant = participant_for(user, evaluation_id)
+    require_in_progress(evaluation)
+    question = get_object_or_404(available_questions(participant), pk=question_id)
+    option = None
+    if data.get('response_option_id') is not None:
+        option = ResponseOption.objects.filter(pk=data['response_option_id'], question=question).first()
+        if option is None:
+            raise ValidationError({'response_option_id': ['Selecione uma opção válida desta questão.']})
+    answer = Answer.objects.filter(evaluation_participant=participant, question=question).first()
+    if answer is None:
+        answer = Answer(evaluation_participant=participant, question=question)
+    answer.response_option = option
+    answer.text_value = data.get('text_value', '')
+    answer.comment = data.get('comment', '')
+    try:
+        answer.full_clean()
+    except ModelValidationError as exc:
+        raise ValidationError(exc.message_dict) from exc
+    answer.save()
+    return answer

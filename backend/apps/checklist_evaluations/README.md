@@ -131,3 +131,100 @@ Roteiro manual:
 11. Confira “Criadas por mim” e “Minhas participações”, navegação mobile, teclado, foco e logout.
 
 Respostas, comentários de respostas, progresso, finalização e resultados ficam para AVA-02/03. Nenhum desses recursos foi antecipado.
+
+## AVA-02 — Preenchimento individual
+
+A AVA-02 acrescenta respostas e progresso **individual**. As descrições anteriores de recursos futuros referem-se ao escopo original da AVA-01; agora o participante pode responder em IN_PROGRESS. Acompanhamento consolidado, respostas alheias, finalização e resultados permanecem fora do escopo.
+
+### Modelo e migração
+
+`Answer` referencia `EvaluationParticipant`, `Question` e, opcionalmente, `ResponseOption`. Não armazena um ID redundante de avaliação. Os textos opcionais usam string vazia por padrão, mantendo o padrão Django; a opção usa NULL. Questão e opção usam PROTECT para preservar respostas; o participante usa CASCADE, mas sua remoção pelo sistema já está bloqueada após o início.
+
+A migração `0002_answer.py` cria somente a nova tabela. A constraint `evaluation_unique_answer` garante um registro por participante/questão. `answer_single_value` exige opção com texto vazio ou texto com conteúdo não branco e sem opção. Regras que dependem das relações (tipo configurado, opção da própria questão, versão e comentário) são validadas em `Answer.clean()`, chamado por `save_answer` antes de qualquer gravação. Não há triggers para impedir alterações SQL administrativas diretas.
+
+### Contrato
+
+Ambos os endpoints exigem sessão, participação explícita e IN_PROGRESS. Criador não participante e usuário externo recebem 404, como recursos inexistentes. DRAFT e COMPLETED retornam 400 com mensagem específica. A decisão desta etapa é restringir também GET a IN_PROGRESS; leitura de respostas concluídas fica para o futuro fluxo de resultados, sem alterar respostas já armazenadas.
+
+`GET /api/checklist-evaluations/{id}/my-questions/` retorna:
+
+```json
+{
+  "evaluation": {
+    "id": 1,
+    "status": "IN_PROGRESS",
+    "ra_version": {"version": "1.0", "architecture_name": "RA Exemplo"},
+    "checklist_version": {"version": "1.0", "checklist_name": "Checklist Exemplo"}
+  },
+  "participant": {"name": "Ana", "stakeholder_roles": [{"id": 3, "name": "Arquiteto"}]},
+  "questions": [{
+    "id": 10,
+    "statement": "Descreva a separação de responsabilidades.",
+    "response_type": "TEXT",
+    "comment_mode": "OPTIONAL",
+    "section": null,
+    "order_index": 0,
+    "options": [],
+    "answer": null
+  }],
+  "progress": {"answered": 0, "total": 1}
+}
+```
+
+Seção, quando presente: `{id, name, order_index}`. Opções de seleção: `{id, label, order_index}`. Uma resposta já salva substitui `answer: null` pelo objeto abaixo. Apenas as respostas do próprio vínculo são buscadas. Não se retorna a estrutura completa dos artefatos privados, e-mails ou respostas de outros participantes.
+
+`PUT /api/checklist-evaluations/{id}/my-answers/{question_id}/` cria ou substitui os valores da resposta, retornando 200 em ambos os casos. Seleção:
+
+```json
+{"response_option_id": 5, "comment": "Justificativa"}
+```
+
+Texto:
+
+```json
+{"text_value": "A arquitetura separa interface, serviços e persistência.", "comment": ""}
+```
+
+Resposta salva:
+
+```json
+{"id": 20, "response_option_id": null, "text_value": "A arquitetura separa interface, serviços e persistência.", "comment": ""}
+```
+
+PUT substitui o valor e o comentário; comentários omitidos equivalem a vazio. Não há PATCH de respostas nesta etapa. Payloads com IDs de participante, usuário, questão, avaliação ou outros campos desconhecidos são rejeitados, em vez de ignorados. O participante vem da sessão e a questão vem do caminho autorizado. PUT usa a proteção CSRF já existente. Campos textuais preservam o conteúdo original; a validação considera `.strip()` para detectar texto ou comentário obrigatório somente em branco. NONE rejeita qualquer comentário não vazio, inclusive espaços. OPTIONAL aceita vazio ou preenchido; REQUIRED exige conteúdo tanto em TEXT quanto SINGLE_CHOICE. SINGLE_CHOICE rejeita qualquer texto principal não vazio e exige opção própria; TEXT exige texto e opção nula.
+
+### Seleção, integridade e concorrência
+
+`available_questions` restringe primeiro a versão da checklist da avaliação. Dentro dela, aplica `stakeholders IS NULL OR stakeholder IN papéis_do_participante`, com DISTINCT e ordenação por `order_index, id`. Sem papéis, somente a primeira condição é satisfeita. Papéis são também restritos à mesma versão. A operação de escrita usa esse mesmo queryset; conhecer um ID de questão omitida não permite respondê-la. Perguntas, seção, opções e respostas próprias são carregadas com select_related/prefetch_related; a quantidade de consultas de leitura não cresce por questão.
+
+`save_answer` verifica participação, inicia uma transação e bloqueia somente a linha da **avaliação**, reconsulta o vínculo e confere IN_PROGRESS. Essa transação curta serializa salvamentos da mesma avaliação e segue a ordem de bloqueios da AVA-01, sem bloquear versões da RA/checklist. Depois resolve a questão disponível, a opção da questão e a resposta do participante. Valida todos os campos antes de inserir ou atualizar. A constraint única permanece como garantia no banco. Dois PUTs simultâneos atualizam o mesmo registro; o último salvamento confirmado prevalece. Não há controle de edição otimista entre abas nesta etapa.
+
+A proteção histórica existente das versões não foi modificada. Nenhum endpoint de finalização foi adicionado; quando esse fluxo existir, deverá coordenar a mudança de status pelo mesmo lock da avaliação. Administração direta por SQL continua fora das garantias dos serviços.
+
+### T18 e W06
+
+`#/evaluations/{id}/respond` reutiliza AppLayout, PageHeader, EmptyState, Notice, estilos e o SVG de navegação existente. O W06 foi consultado no Figma: cabeçalho contextual, progresso, navegador de questões de 272 px e área de resposta. A lista identifica as seções sem alterar a ordem global das questões. Seletores são radios nativos acessíveis, com opções vindas da API; não há escala fixa. TEXT usa textarea e o comentário adicional segue sua configuração. Conteúdo do usuário continua escapado pelo React.
+
+Ações de resposta aparecem na listagem/detalhe apenas para participantes em IN_PROGRESS. A tela oferece anterior, próxima, salvar e salvar/próxima, confirmação de persistência, questões respondidas e progresso derivado de respostas salvas. Uma guarda síncrona impede submissão duplicada. Alterações locais geram confirmação ao trocar de questão, navegar por hash ou sair da sessão, além do aviso nativo em recarregamento/fechamento. Cancelar mantém o rascunho. Não há autosave nem persistência local de respostas não salvas; descartar é uma ação explícita do usuário.
+
+### Roteiro manual AVA-02
+
+1. Prepare uma checklist com TEXT e SINGLE_CHOICE, comentários NONE/OPTIONAL/REQUIRED, questões comuns e questões ligadas a diferentes papéis. Inclua ao menos uma seção e uma questão vinculada a dois papéis.
+2. Crie uma avaliação, associe contas com zero, um e múltiplos papéis e inicie conforme o fluxo da AVA-01.
+3. Entre como participante e use **Responder avaliação**. Confira a união de suas questões e das comuns, sem duplicação; outro participante pode receber uma lista diferente.
+4. Salve uma seleção e uma resposta textual. Tente salvar sem opção, texto vazio e comentário obrigatório em branco. NONE não deve apresentar campo adicional.
+5. Troque de questão, retorne, altere e salve a resposta. Confira progresso sem aumentar a contagem na atualização da mesma questão. Digitar sem salvar não aumenta o progresso.
+6. Com alterações locais, tente trocar de questão, navegar para outra área, usar voltar do navegador ou sair da sessão. Cancele e confira a preservação; aceite apenas quando quiser descartar. Recarregar mostra o aviso nativo.
+7. Após salvar, recarregue e confira sessão, respostas e progresso recuperados da API. Use a tela em desktop e mobile e navegue por teclado.
+8. Entre como criador não participante ou usuário externo e tente o URL de resposta: deve negar acesso. Um participante de avaliação com artefatos privados consegue responder, mas continua sem abrir os endpoints privados originais.
+9. Abra diretamente a rota de resposta de uma avaliação DRAFT: a mensagem deve informar que ainda não iniciou. Não há ação de conclusão nesta entrega; o comportamento COMPLETED é coberto nos testes por esse estado existente no modelo.
+10. Confira o estado vazio de um participante sem questões comuns nem papéis correspondentes, sem respostas artificiais.
+
+### Verificações executadas em 12/11/2026
+
+- Migração `0002_answer` aplicada ao PostgreSQL local; `makemigrations --check --dry-run` sem mudanças; `manage.py check` sem problemas.
+- Suíte completa: **148 testes aprovados** (124 anteriores e 24 novos). O teste de concorrência executa dois PUTs com sessões/CSRF e conexões PostgreSQL independentes; ambos retornam o mesmo ID e deixam uma única resposta.
+- `npm run typecheck`, `npm run build` e `git diff --check` aprovados, sem dependências novas.
+- Chromium headless: login pela interface; leitura de quatro questões disponíveis; salvamento de SINGLE_CHOICE e TEXT; campos NONE/OPTIONAL/REQUIRED; progresso sem contar rascunhos; cancelamento de troca de questão e navegação por hash; respostas e sessão recuperadas após reload. Sem exceções JavaScript no fluxo verificado.
+- Capturas desktop de 1440 px e mobile de 390 px foram inspecionadas; não houve overflow horizontal. As rotinas usaram um banco PostgreSQL de testes separado e scripts temporários fora do repositório, preservando os dados de desenvolvimento.
+- Nenhum documento acadêmico em `docs/` foi alterado. Não foram executados commit ou push.

@@ -7,7 +7,7 @@ A proposta atual combina:
 - avaliação conceitual da RA, apoiada por checklists e critérios da literatura;
 - avaliação prática por instanciação, registrando evidências e conformidade entre uma RA e arquiteturas concretas derivadas dela.
 
-A documentação acadêmica em `docs/` é a fonte de verdade e permanece preservada. Estão implementados autenticação, RAs versionadas com elementos/tipos customizados, checklists configuráveis e AVA-01: criação, participantes, revisão e início de avaliações por checklist, com proteção histórica das versões utilizadas. Respostas, progresso, finalização e resultados ficam para AVA-02/03. Consulte os contratos e a estratégia de concorrência no [README de AVA-01](backend/apps/checklist_evaluations/README.md).
+A documentação acadêmica em `docs/` é a fonte de verdade e permanece preservada. Estão implementados autenticação, RAs versionadas com elementos/tipos customizados, checklists configuráveis e AVA-01: criação, participantes, revisão e início de avaliações por checklist, com proteção histórica das versões utilizadas. A AVA-02 acrescenta preenchimento individual, respostas atualizáveis e progresso por participante. Finalização e resultados consolidados ficam para AVA-03. Consulte os contratos e a estratégia de concorrência no [README de avaliações](backend/apps/checklist_evaluations/README.md).
 
 ## Pré-requisitos e versões
 

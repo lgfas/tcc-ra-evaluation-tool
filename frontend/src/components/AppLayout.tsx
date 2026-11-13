@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { api, ApiError, type User } from '../services/api';
 import Notice from './Notice';
+import { allowAnswerNavigation } from '../services/evaluations';
 import navDot from '../assets/nav-dot.svg';
 
 const pending = ['Arq. Concretas', 'Catálogo'];
@@ -19,6 +20,7 @@ export default function AppLayout({ user, route, onLogout, children }: {
     previousRoute.current = route;
   }, [route]);
   async function exit() {
+    if (!allowAnswerNavigation()) return;
     setBusy(true); setError('');
     try { await api('/auth/logout/', 'POST'); onLogout(); }
     catch (err) {

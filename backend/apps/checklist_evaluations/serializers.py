@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from apps.checklists.serializers import StrictInputSerializer
-from apps.checklists.models import StakeholderRole
+from apps.checklists.serializers import StrictInputSerializer, SectionSerializer, OptionSerializer
+from apps.checklists.models import StakeholderRole, Question
 from apps.checklists.permissions import accessible_checklists
 from apps.reference_architectures.permissions import accessible_architectures
-from .models import ChecklistEvaluation, EvaluationParticipant
+from .models import ChecklistEvaluation, EvaluationParticipant, Answer
 
 
 class VersionsInput(StrictInputSerializer):
@@ -87,3 +87,30 @@ class EvaluationDetailSerializer(EvaluationSummarySerializer):
             data['available_stakeholders'] = RoleSerializer(obj.checklist_version.stakeholders.all(), many=True).data if (
                 can_read_checklist and obj.status == ChecklistEvaluation.Status.DRAFT) else []
         return data
+
+
+class AnswerInput(StrictInputSerializer):
+    response_option_id = serializers.IntegerField(min_value=1, required=False, allow_null=True)
+    text_value = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
+    comment = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ['id', 'response_option_id', 'text_value', 'comment']
+        read_only_fields = fields
+
+
+class MyQuestionSerializer(serializers.ModelSerializer):
+    section = SectionSerializer(read_only=True)
+    options = OptionSerializer(many=True, read_only=True)
+    answer = serializers.SerializerMethodField()
+
+    def get_answer(self, obj):
+        answers = obj.own_answers
+        return AnswerSerializer(answers[0]).data if answers else None
+
+    class Meta:
+        model = Question
+        fields = ['id', 'statement', 'response_type', 'comment_mode', 'section', 'order_index', 'options', 'answer']

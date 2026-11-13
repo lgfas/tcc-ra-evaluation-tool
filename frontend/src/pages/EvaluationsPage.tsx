@@ -24,7 +24,7 @@ export function EvaluationList() {
   function group(title: string, evaluations: EvaluationSummary[]) {
     return <section className="page-stack"><h2>{title}</h2>{evaluations.length ? <ul className="architecture-grid">{evaluations.map(item => <li className="card" key={item.id}>
       <span className="badge">{statusLabels[item.status]}</span><h3><a href={`#/evaluations/${item.id}`}>{item.ra_version.architecture_name} · v{item.ra_version.version}</a></h3>
-      <p>{item.checklist_version.checklist_name} · v{item.checklist_version.version}</p><small>Criada em {new Date(item.created_at).toLocaleString('pt-BR')}</small><a href={`#/evaluations/${item.id}`}>Abrir avaliação →</a>
+      <p>{item.checklist_version.checklist_name} · v{item.checklist_version.version}</p><small>Criada em {new Date(item.created_at).toLocaleString('pt-BR')}</small><a href={`#/evaluations/${item.id}`}>Abrir avaliação →</a>{item.is_participant && item.status === 'IN_PROGRESS' && <a className="button-link" href={`#/evaluations/${item.id}/respond`}>Responder avaliação</a>}
     </li>)}</ul> : <div className="card"><EmptyState title="Nenhuma avaliação nesta lista" /></div>}</section>;
   }
   return <section className="page-stack"><PageHeader title="Minhas Avaliações" eyebrow="Avaliações por checklist" actions={<a className="button-link" href="#/evaluations/new">+ Nova avaliação</a>} />
@@ -117,7 +117,7 @@ export function EvaluationDetail({ id }: {id: number}) {
   const checklistLabel = `${evaluation.checklist_version.checklist_name} · v${evaluation.checklist_version.version}`;
   return <section className="page-stack evaluation-page"><PageHeader title={`Avaliação da ${evaluation.ra_version.architecture_name}`} eyebrow={<a href="#/evaluations">Avaliação por checklist</a>}
     badge={<span className="badge">{evaluation.status} · {statusLabels[evaluation.status]}</span>}
-    actions={canEdit ? <span className="muted">Rascunho salvo</span> : undefined} />
+    actions={evaluation.is_participant && evaluation.status === 'IN_PROGRESS' ? <a className="button-link" href={`#/evaluations/${id}/respond`}>Responder avaliação</a> : canEdit ? <span className="muted">Rascunho salvo</span> : undefined} />
     <p className="muted">Criada em {new Date(evaluation.created_at).toLocaleString('pt-BR')}</p>
     {evaluation.is_creator && <ol className="evaluation-steps" aria-label="Etapas da configuração">
       <li><button className="secondary" disabled={!canEdit} aria-current={step === 1 ? 'step' : undefined} onClick={() => {setStep(1); open({kind:'versions'});}}><span>1</span> Artefatos</button></li>
@@ -125,7 +125,7 @@ export function EvaluationDetail({ id }: {id: number}) {
       <li><button className="secondary" aria-current={step === 3 ? 'step' : undefined} onClick={() => {setStep(3); summary.current?.focus();}}><span>3</span> Revisão</button></li>
     </ol>}
     {error && (!panel || panel.kind === 'participant' || panel.kind === 'versions') && <Notice message={error} error />}{success && <Notice message={success} />}
-    {evaluation.status !== 'DRAFT' && <p className="preservation-note">Avaliação iniciada: versões, participantes e papéis não podem mais ser alterados. O preenchimento das respostas será disponibilizado em uma próxima etapa.</p>}
+    {evaluation.status !== 'DRAFT' && <p className="preservation-note">Avaliação iniciada: versões, participantes e papéis não podem mais ser alterados.</p>}
     <div className={`evaluation-columns ${!evaluation.is_creator ? 'participant-context' : ''}`}><div className="page-stack">
       <section className="card page-stack"><div className="section-heading"><h2>Artefatos selecionados</h2>{canEdit && <button className="secondary" onClick={() => open({kind:'versions'})}>Alterar versões</button>}</div>
         <dl className="artifact-pair"><div><dt>Arquitetura de Referência</dt><dd>{raLabel}</dd></div><div><dt>Checklist</dt><dd>{checklistLabel}</dd></div></dl>
@@ -140,7 +140,7 @@ export function EvaluationDetail({ id }: {id: number}) {
         </li>)}</ul> : <div className="card"><EmptyState title="Nenhum participante cadastrado"><p>Adicione contas existentes pelo e-mail exato. O criador não é incluído automaticamente.</p></EmptyState></div>}
         <aside className="preservation-note"><h3>Como as questões são definidas</h3><p>Participantes com papéis receberão as questões associadas a qualquer um dos seus papéis e as questões comuns. Sem papéis, receberão apenas as questões comuns.</p></aside>
       </> : <section className="card page-stack"><h2>Minha participação</h2><p>{evaluation.own_participation?.stakeholder_roles.length ? evaluation.own_participation.stakeholder_roles.map(role => role.name).join(', ') : 'Somente questões comuns a todos os participantes.'}</p>
-        <p className="muted">{evaluation.status === 'DRAFT' ? 'A avaliação está em preparação e ainda não pode ser preenchida.' : 'O preenchimento de respostas será disponibilizado em uma próxima etapa.'}</p></section>}
+        <p className="muted">{evaluation.status === 'DRAFT' ? 'A avaliação está em preparação e ainda não pode ser preenchida.' : evaluation.status === 'IN_PROGRESS' ? 'Use Responder avaliação para preencher suas questões.' : 'Esta avaliação está concluída e não aceita alterações nas respostas.'}</p></section>}
     </div>
     {evaluation.is_creator && <aside className="card evaluation-summary page-stack" ref={summary} tabIndex={-1} aria-label="Resumo da configuração"><h2>Resumo da configuração</h2>
       <dl><div><dt>Status</dt><dd>{evaluation.status}</dd></div><div><dt>RA</dt><dd>{raLabel}</dd></div><div><dt>Checklist</dt><dd>{checklistLabel}</dd></div>

@@ -16,3 +16,22 @@ export interface Evaluation extends EvaluationSummary {
 export interface VersionSelection {ra_version_id: number; checklist_version_id: number}
 export interface ArtifactChoice {id: number; name: string; visibility: 'PUBLIC' | 'PRIVATE'; versions: {id: number; version: string}[]}
 export interface EvaluationChoices {architectures: ArtifactChoice[]; checklists: ArtifactChoice[]}
+
+export interface OwnAnswer {id: number; response_option_id: number | null; text_value: string; comment: string}
+export interface AnswerValue {response_option_id: number | null; text_value: string; comment: string}
+export interface MyQuestion {
+  id: number; statement: string; response_type: 'SINGLE_CHOICE' | 'TEXT'; comment_mode: 'NONE' | 'OPTIONAL' | 'REQUIRED';
+  order_index: number; section: {id: number; name: string; order_index: number} | null;
+  options: {id: number; label: string; order_index: number}[]; answer: OwnAnswer | null;
+}
+export interface MyQuestions {
+  evaluation: {id: number; status: keyof typeof statusLabels; ra_version: {version: string; architecture_name: string}; checklist_version: {version: string; checklist_name: string}};
+  participant: {name: string; stakeholder_roles: EvaluationRole[]}; questions: MyQuestion[]; progress: {answered: number; total: number};
+}
+// One mounted response workspace can guard the existing hash navigation without a router dependency.
+let navigationGuard: (() => boolean) | null = null;
+export function registerAnswerNavigationGuard(guard: () => boolean) {
+  navigationGuard = guard;
+  return () => {if (navigationGuard === guard) navigationGuard = null;};
+}
+export function allowAnswerNavigation() {return navigationGuard?.() ?? true;}

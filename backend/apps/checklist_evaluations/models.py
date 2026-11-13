@@ -43,3 +43,45 @@ class ParticipantRole(models.Model):
             version_id = self.evaluation_participant.checklist_evaluation.checklist_version_id
             if self.stakeholder_role.checklist_version_id != version_id:
                 raise ValidationError('O papel deve pertencer à versão de checklist da avaliação.')
+
+
+class Answer(models.Model):
+    evaluation_participant = models.ForeignKey(EvaluationParticipant, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey('checklists.Question', on_delete=models.PROTECT, related_name='answers')
+    response_option = models.ForeignKey('checklists.ResponseOption', null=True, blank=True,
+                                        on_delete=models.PROTECT, related_name='answers')
+    text_value = models.TextField(blank=True, default='')
+    comment = models.TextField(blank=True, default='')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['evaluation_participant', 'question'], name='evaluation_unique_answer'),
+            models.CheckConstraint(condition=(
+                models.Q(response_option__isnull=False, text_value='') |
+                models.Q(response_option__isnull=True, text_value__regex=r'\S')
+            ), name='answer_single_value'),
+        ]
+
+    def clean(self):
+        from apps.checklists.models import Question
+
+        errors = {}
+        question = self.question
+        if question.checklist_version_id != self.evaluation_participant.checklist_evaluation.checklist_version_id:
+            errors['question'] = 'A questão não pertence à checklist desta avaliação.'
+        if question.response_type == Question.ResponseType.SINGLE_CHOICE:
+            if not self.response_option_id or self.response_option.question_id != question.pk:
+                errors['response_option_id'] = 'Selecione uma opção válida desta questão.'
+            if self.text_value:
+                errors['text_value'] = 'Uma questão de seleção não aceita resposta textual.'
+        else:
+            if not self.text_value.strip():
+                errors['text_value'] = 'Preencha a resposta textual.'
+            if self.response_option_id:
+                errors['response_option_id'] = 'Uma questão textual não aceita opção de seleção.'
+        if question.comment_mode == Question.CommentMode.NONE and self.comment:
+            errors['comment'] = 'Esta questão não permite comentário.'
+        if question.comment_mode == Question.CommentMode.REQUIRED and not self.comment.strip():
+            errors['comment'] = 'Preencha o comentário obrigatório.'
+        if errors:
+            raise ValidationError(errors)

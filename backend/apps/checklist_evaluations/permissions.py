@@ -15,3 +15,30 @@ def require_creator(evaluation, user):
 def require_draft(evaluation):
     if evaluation.status != ChecklistEvaluation.Status.DRAFT:
         raise ValidationError({'detail': 'A configuração só pode ser alterada enquanto a avaliação está em DRAFT.'})
+
+
+def participant_for(user, evaluation_id):
+    from django.shortcuts import get_object_or_404
+    from .models import EvaluationParticipant
+
+    # Creator status alone never grants access to the response workspace.
+    return get_object_or_404(EvaluationParticipant.objects.select_related(
+        'user', 'checklist_evaluation__ra_version__reference_architecture',
+        'checklist_evaluation__checklist_version__checklist'),
+        checklist_evaluation_id=evaluation_id, user=user)
+
+
+def require_in_progress(evaluation):
+    if evaluation.status != ChecklistEvaluation.Status.IN_PROGRESS:
+        message = ('A avaliação ainda não foi iniciada.' if evaluation.status == ChecklistEvaluation.Status.DRAFT
+                   else 'A avaliação está concluída e não aceita alterações nas respostas.')
+        raise ValidationError({'detail': message})
+
+
+def available_questions(participant):
+    from apps.checklists.models import Question
+
+    evaluation = participant.checklist_evaluation
+    roles = participant.stakeholder_roles.filter(checklist_version_id=evaluation.checklist_version_id)
+    return Question.objects.filter(checklist_version_id=evaluation.checklist_version_id).filter(
+        Q(stakeholders__isnull=True) | Q(stakeholders__in=roles)).distinct().order_by('order_index', 'id')

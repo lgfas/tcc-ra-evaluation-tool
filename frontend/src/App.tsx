@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api, ApiError, type User } from './services/api';
 import { ChecklistList, ChecklistCreate, ChecklistDetail } from './pages/ChecklistsPage';
 import { EvaluationList, EvaluationCreate, EvaluationDetail } from './pages/EvaluationsPage';
+import EvaluationRespondPage from './pages/EvaluationRespondPage';
+import { allowAnswerNavigation } from './services/evaluations';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import Notice from './components/Notice';
@@ -9,8 +11,21 @@ import AppLayout from './components/AppLayout';
 import { ArchitectureList, ArchitectureCreate, ArchitectureDetail } from './pages/ArchitecturesPage';
 export default function App() {
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
-  useEffect(() => { const change = () => setRoute(window.location.hash.slice(1) || '/'); window.addEventListener('hashchange', change); return () => window.removeEventListener('hashchange', change); }, []);
+  useEffect(() => {
+    let acceptedHash = window.location.hash || '#/';
+    const change = () => {
+      if (!allowAnswerNavigation()) {
+        window.history.replaceState(null, '', acceptedHash);
+        return;
+      }
+      acceptedHash = window.location.hash || '#/';
+      setRoute(window.location.hash.slice(1) || '/');
+    };
+    window.addEventListener('hashchange', change);
+    return () => window.removeEventListener('hashchange', change);
+  }, []);
   const [path, query = ''] = route.split('?');
+  const responseRoute = /^\/evaluations\/(\d+)\/respond$/.exec(path);
   const evaluationDetail = /^\/evaluations\/(\d+)$/.exec(path);
   const checklistDetail = /^\/checklists\/(\d+)$/.exec(route);
   const detail = /^\/reference-architectures\/(\d+)$/.exec(route);
@@ -33,6 +48,7 @@ export default function App() {
       : route === '/reference-architectures/new' ? <ArchitectureCreate />
       : path === '/evaluations' ? <EvaluationList />
       : path === '/evaluations/new' ? <EvaluationCreate key={route} initialRaVersionId={Number(new URLSearchParams(query).get('ra_version_id')) || 0} />
+      : responseRoute ? <EvaluationRespondPage key={responseRoute[1]} id={Number(responseRoute[1])} />
       : evaluationDetail ? <EvaluationDetail key={evaluationDetail[1]} id={Number(evaluationDetail[1])} />
       : route === '/checklists' ? <ChecklistList />
       : route === '/checklists/new' ? <ChecklistCreate />
