@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('<int:pk>/progress/', views.ProgressView.as_view()),
+    path('<int:pk>/complete/', views.CompleteView.as_view()),
+    path('<int:pk>/results/', views.ResultsView.as_view()),
     path('<int:pk>/my-questions/', views.MyQuestionsView.as_view()),
     path('<int:pk>/my-answers/<int:question_id>/', views.MyAnswerView.as_view()),
     path('', views.EvaluationListView.as_view()),

@@ -35,3 +35,28 @@ export function registerAnswerNavigationGuard(guard: () => boolean) {
   return () => {if (navigationGuard === guard) navigationGuard = null;};
 }
 export function allowAnswerNavigation() {return navigationGuard?.() ?? true;}
+
+export interface EvaluationTotals {
+  participants: number; expected: number; answered: number; pending: number;
+  percentage: number | null; participants_with_pending: number;
+}
+export interface ParticipantProgress {
+  id: number; user: {id: number; name: string}; stakeholder_roles: EvaluationRole[];
+  total: number; answered: number; pending: number; percentage: number | null;
+  pending_questions: {id: number; statement: string}[];
+}
+export interface EvaluationProgress {
+  id: number; status: EvaluationSummary['status']; totals: EvaluationTotals; participants: ParticipantProgress[];
+}
+export interface QuestionResult {
+  id: number; statement: string; response_type: MyQuestion['response_type']; comment_mode: MyQuestion['comment_mode'];
+  order_index: number; section: {id: number; name: string} | null; stakeholder_roles: EvaluationRole[];
+  expected: number; answered: number; pending: number;
+  distribution: {id: number; label: string; count: number; percentage: number | null}[];
+  responses: {participant_id: number; answer: OwnAnswer | null}[];
+}
+export interface EvaluationResults extends EvaluationProgress {
+  ra_version: {id: number; version: string; architecture_name: string};
+  checklist_version: {id: number; version: string; checklist_name: string};
+  questions: QuestionResult[];
+}

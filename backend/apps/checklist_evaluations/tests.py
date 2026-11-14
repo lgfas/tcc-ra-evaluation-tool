@@ -302,9 +302,10 @@ class EvaluationTests(EvaluationFixture, TestCase):
         for url, data, method in writes:
             self.assertEqual(self.write(url, data, method).status_code, 403)
 
-    def test_no_evaluation_deletion_or_completion_endpoint(self):
+    def test_no_evaluation_deletion_or_completion_of_draft(self):
         self.assertEqual(self.write(self.url, method='delete').status_code, 405)
-        self.assertEqual(self.write(self.url + 'complete/').status_code, 404)
+        # AVA-03 adds completion, but a DRAFT still cannot transition directly to COMPLETED.
+        self.assertEqual(self.write(self.url + 'complete/').status_code, 400)
         self.assertEqual(self.write(self.url + 'start/', {'status': 'COMPLETED'}).status_code, 400)
 
     def structural_writes(self):

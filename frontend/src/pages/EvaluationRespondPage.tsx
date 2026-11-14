@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
-import { api } from '../services/api';
+import { api, ApiError } from '../services/api';
 import { evaluationBase as base, evaluationError, registerAnswerNavigationGuard, type AnswerValue, type MyQuestions, type OwnAnswer } from '../services/evaluations';
 import PageHeader from '../components/PageHeader';
 import EmptyState from '../components/EmptyState';
@@ -17,6 +17,7 @@ export default function EvaluationRespondPage({id}: {id: number}) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [retry, setRetry] = useState(0);
+  const [completed, setCompleted] = useState(false);
   const [validationError, setValidationError] = useState<{field: InvalidField; message: string} | null>(null);
   const validationId = useId();
   const submitting = useRef(false);
@@ -40,7 +41,13 @@ export default function EvaluationRespondPage({id}: {id: number}) {
     setLoading(true); setError('');
     api<MyQuestions>(`${base}${id}/my-questions/`).then(result => {
       if (active) {setData(result); setIndex(0); setValue(valueOf(result.questions[0]?.answer ?? null));}
-    }).catch(err => {if (active) setError(evaluationError(err));}).finally(() => {if (active) setLoading(false);});
+    }).catch(async err => {
+      if (err instanceof ApiError && err.status === 400) {
+        const detail = await api<{status: string}>(`${base}${id}/`).catch(() => null);
+        if (active && detail?.status === 'COMPLETED') setCompleted(true);
+      }
+      if (active) setError(evaluationError(err));
+    }).finally(() => {if (active) setLoading(false);});
     return () => {active = false;};
   }, [id, retry]);
   function navigate(next: number) {
@@ -81,9 +88,16 @@ export default function EvaluationRespondPage({id}: {id: number}) {
         requestAnimationFrame(() => heading.current?.focus());
       } else {setValue(valueOf(answer));}
       setSuccess('Resposta salva.');
-    } catch (err) {setError(evaluationError(err));} finally {submitting.current = false; setBusy(false);}
+    } catch (err) {
+      setError(evaluationError(err));
+      if (err instanceof ApiError && err.status === 400) {
+        const detail = await api<{status: string}>(`${base}${id}/`).catch(() => null);
+        if (detail?.status === 'COMPLETED') {setCompleted(true); setData(null); setValue(emptyAnswer());}
+      }
+    } finally {submitting.current = false; setBusy(false);}
   }
   if (loading) return <p role="status">Carregando questões…</p>;
+  if (completed) return <section className="page-stack"><PageHeader title="Avaliação concluída" /><Notice message="Esta avaliação foi concluída e não aceita novas respostas ou alterações." /><a className="button-link" href={`#/evaluations/${id}`}>Voltar à avaliação</a></section>;
   if (!data) return <section className="page-stack"><PageHeader title="Responder avaliação" /><Notice message={error || 'Avaliação indisponível.'} error /><a href={`#/evaluations/${id}`}>Voltar à avaliação</a><button onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></section>;
   // Only answers returned by GET or a successful save contribute to completion.
   const answered = data.questions.filter(question => question.answer !== null).length;

@@ -157,7 +157,7 @@ textarea { resize: vertical; min-height: 140px; }
 .move-controls { display: inline-flex; gap: 4px; }
 .move-controls button { width: 40px; padding: 4px; }
 .structure-list .card { display: grid; gap: 12px; justify-items: start; }
-.preserve-lines { white-space: pre-wrap; }
+.preserve-lines { white-space: pre-wrap; overflow-wrap: anywhere; }
 .question-form textarea { min-height: 92px; }
 .options-editor, .stakeholder-choices { border-top: 1px solid var(--border); padding-top: 12px; }
 .options-editor legend, .stakeholder-choices legend { padding-right: 8px; font-size: 14px; }
@@ -243,3 +243,16 @@ textarea { resize: vertical; min-height: 140px; }
 .answer-option input[type=radio] { min-height: 18px; padding: 0; }
 @media (max-width: 480px) { .current-question { padding: 20px; } }
 @media (max-width: 1000px) { .question-navigator li { display: flex; flex-direction: column; justify-content: flex-end; } }
+
+/* W07: monitoring and completed results share the evaluation context. */
+.tabs button.is-active { background: var(--subtle); color: var(--brand); font-weight: 600; }
+.monitoring-columns { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+.monitoring-note { background: var(--subtle); }
+.participant-progress, .question-result, .distribution-option, .result-response { min-width: 0; overflow-wrap: anywhere; }
+.result-response { padding: 16px 0; border-top: 1px solid var(--border); }
+@media (max-width: 1100px) {
+  .monitoring-columns { grid-template-columns: minmax(0, 1fr); }
+}
+
+.participant-progress { padding: 16px; gap: 8px; }
+.participant-progress h4, .participant-progress p { margin: 0; }

@@ -114,3 +114,7 @@ class MyQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'statement', 'response_type', 'comment_mode', 'section', 'order_index', 'options', 'answer']
+
+
+class CompleteInput(StrictInputSerializer):
+    confirm_incomplete = serializers.BooleanField(required=False, default=False)

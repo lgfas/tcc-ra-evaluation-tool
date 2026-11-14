@@ -130,3 +130,23 @@ class MyAnswerView(APIView):
         serializer.is_valid(raise_exception=True)
         answer = services.save_answer(user=request.user, evaluation_id=pk, question_id=question_id, data=serializer.validated_data)
         return Response(schema.AnswerSerializer(answer).data)
+
+
+class ProgressView(APIView):
+    def get(self, request, pk):
+        return Response(services.evaluation_progress(user=request.user, evaluation=evaluation_for(request, pk)))
+
+
+class CompleteView(APIView):
+    def post(self, request, pk):
+        evaluation = evaluation_for(request, pk)
+        require_creator(evaluation, request.user)
+        serializer = schema.CompleteInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = services.complete_evaluation(user=request.user, evaluation=evaluation, **serializer.validated_data)
+        return Response({'id': result.pk, 'status': result.status})
+
+
+class ResultsView(APIView):
+    def get(self, request, pk):
+        return Response(services.evaluation_results(user=request.user, evaluation=evaluation_for(request, pk)))

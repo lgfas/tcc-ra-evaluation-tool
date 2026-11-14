@@ -9,7 +9,7 @@ def accessible_evaluations(user):
 
 def require_creator(evaluation, user):
     if evaluation.created_by_user_id != user.pk:
-        raise PermissionDenied('Somente o criador pode configurar ou iniciar esta avaliação.')
+        raise PermissionDenied('Esta operação é permitida somente ao criador da avaliação.')
 
 
 def require_draft(evaluation):
@@ -35,10 +35,18 @@ def require_in_progress(evaluation):
         raise ValidationError({'detail': message})
 
 
-def available_questions(participant):
+def available_questions(participant, *, candidates=None):
     from apps.checklists.models import Question
 
     evaluation = participant.checklist_evaluation
+    if candidates is not None:
+        # Bulk reports pass prefetched questions and roles: same union, without N+1 queries.
+        roles = {role.pk for role in participant.stakeholder_roles.all()
+                 if role.checklist_version_id == evaluation.checklist_version_id}
+        return [question for question in candidates
+                if question.checklist_version_id == evaluation.checklist_version_id
+                and (not question.stakeholders.all() or
+                     any(role.pk in roles for role in question.stakeholders.all()))]
     roles = participant.stakeholder_roles.filter(checklist_version_id=evaluation.checklist_version_id)
     return Question.objects.filter(checklist_version_id=evaluation.checklist_version_id).filter(
         Q(stakeholders__isnull=True) | Q(stakeholders__in=roles)).distinct().order_by('order_index', 'id')

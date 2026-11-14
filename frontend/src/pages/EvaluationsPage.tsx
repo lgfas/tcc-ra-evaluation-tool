@@ -8,6 +8,7 @@ import EditorPanel from '../components/EditorPanel';
 import EvaluationSelection from '../components/evaluations/EvaluationSelection';
 import ParticipantEditor from '../components/evaluations/ParticipantEditor';
 import VersionsEditor from '../components/evaluations/VersionsEditor';
+import EvaluationMonitoring from '../components/evaluations/EvaluationMonitoring';
 
 export function EvaluationList() {
   const [items, setItems] = useState<EvaluationSummary[]>([]);
@@ -110,6 +111,7 @@ export function EvaluationDetail({ id }: {id: number}) {
   }
   if (loading) return <p role="status">Carregando avaliação…</p>;
   if (!evaluation) return <section className="page-stack"><PageHeader title="Avaliação indisponível" /><Notice message={error || 'Não foi possível carregar a avaliação.'} error /><a href="#/evaluations">Voltar à listagem</a><button onClick={() => setRetry(current => current + 1)}>Tentar novamente</button></section>;
+  if (evaluation.is_creator && evaluation.status !== 'DRAFT') return <EvaluationMonitoring evaluation={evaluation} onStatus={status => setEvaluation(current => current ? {...current, status, can_configure:false} : current)} />;
   const canEdit = evaluation.can_configure;
   const participants = evaluation.participants ?? [];
   const rolesUsed = new Set(participants.flatMap(item => item.stakeholder_roles.map(role => role.id))).size;

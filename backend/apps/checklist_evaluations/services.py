@@ -161,3 +161,51 @@ def save_answer(*, user, evaluation_id, question_id, data):
         raise ValidationError(exc.message_dict) from exc
     answer.save()
     return answer
+
+
+def locked_report_evaluation(*, user, evaluation):
+    evaluation = ChecklistEvaluation.objects.select_for_update(of=('self',)).select_related(
+        'ra_version__reference_architecture', 'checklist_version__checklist').get(pk=evaluation.pk)
+    require_creator(evaluation, user)
+    return evaluation
+
+
+@transaction.atomic
+def evaluation_progress(*, user, evaluation):
+    from .reporting import snapshot
+
+    evaluation = locked_report_evaluation(user=user, evaluation=evaluation)
+    if evaluation.status == ChecklistEvaluation.Status.DRAFT:
+        raise ValidationError({'detail': 'O acompanhamento estará disponível após o início da avaliação.'})
+    return snapshot(evaluation)[0]
+
+
+@transaction.atomic
+def complete_evaluation(*, user, evaluation, confirm_incomplete=False):
+    from .permissions import require_in_progress
+    from .reporting import snapshot
+
+    # Same row lock as save_answer; no extra version locks or changes to their canonical order.
+    evaluation = locked_report_evaluation(user=user, evaluation=evaluation)
+    require_in_progress(evaluation)
+    progress = snapshot(evaluation)[0]
+    totals = progress['totals']
+    if totals['pending'] and not confirm_incomplete:
+        raise ValidationError({
+            'detail': (f"Há {totals['pending']} resposta(s) pendente(s) de "
+                       f"{totals['participants_with_pending']} participante(s). Confirme explicitamente o encerramento com pendências."),
+            'pending': totals['pending'], 'participants_with_pending': totals['participants_with_pending'],
+        })
+    evaluation.status = ChecklistEvaluation.Status.COMPLETED
+    evaluation.save(update_fields=['status'])
+    return evaluation
+
+
+@transaction.atomic
+def evaluation_results(*, user, evaluation):
+    from .reporting import results
+
+    evaluation = locked_report_evaluation(user=user, evaluation=evaluation)
+    if evaluation.status != ChecklistEvaluation.Status.COMPLETED:
+        raise ValidationError({'detail': 'Os resultados estarão disponíveis somente após a finalização da avaliação.'})
+    return results(evaluation)
