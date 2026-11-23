@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('derive/', views.DeriveChecklistView.as_view()),
     path('', views.ChecklistListView.as_view()),
     path('<int:pk>/', views.ChecklistDetailView.as_view()),
     path('<int:pk>/versions/', views.VersionListView.as_view()),

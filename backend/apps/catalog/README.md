@@ -1,6 +1,6 @@
 # CAT-01 — Catálogo público
 
-Consulta autenticada de RAs e checklists públicas, usando os modelos existentes. Implementa a descoberta de artefatos de RF-CAT-01 a RF-CAT-04 e T33–T35; não implementa derivação (CAT-02/T36/RF-CAT-05).
+Consulta autenticada de RAs e checklists públicas, usando os modelos existentes. Implementa a descoberta de artefatos de RF-CAT-01 a RF-CAT-04 e T33–T35; a derivação de checklist (CAT-02/T36/RF-CAT-05) é implementada na app checklists, conforme seu [README](../checklists/README.md).
 
 ## API
 
@@ -62,7 +62,7 @@ Roteiro com duas contas:
 6. Confira Minhas Arquiteturas/Minhas Checklists: os artefatos públicos da conta A não devem surgir nas listas da conta B. Pela API, tentativas de editar originais públicos de A devem ser rejeitadas.
 7. Repita em desktop/mobile e navegue por teclado, incluindo busca por Enter, alternância de tipos, detalhes e retorno ao catálogo.
 
-Derivação, convites, escala numérica, uploads e busca avançada permanecem fora desta entrega.
+CAT-02 acrescentou a ação Criar derivação no detalhe da checklist pública. Convites, escala numérica, uploads e busca avançada continuam fora do escopo.
 
 ## Verificações executadas em 23/11/2026
 

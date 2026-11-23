@@ -3,7 +3,12 @@ export interface ChecklistSummary {
   id: number; name: string; origin: string; visibility: 'PRIVATE' | 'PUBLIC';
   owner_user: number; can_edit: boolean; version_count: number;
 }
-export interface Checklist extends ChecklistSummary { versions: ChecklistVersion[] }
+export type DerivationSource = {available: false} | {available: true; checklist_id: number; name: string; version_id: number; version: string};
+export interface Checklist extends ChecklistSummary {
+  versions: ChecklistVersion[];
+  derived_from_checklist_version: number | null;
+  derivation_source: DerivationSource | null;
+}
 export interface ChecklistSection { id: number; name: string; order_index: number }
 export interface StakeholderRole { id: number; name: string; description: string }
 export interface ResponseOption { id: number; label: string; order_index: number }

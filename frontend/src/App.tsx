@@ -12,6 +12,7 @@ import AppLayout from './components/AppLayout';
 import { ArchitectureList, ArchitectureCreate, ArchitectureDetail } from './pages/ArchitecturesPage';
 export default function App() {
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
+  const [derivedChecklistId, setDerivedChecklistId] = useState<number | null>(null);
   useEffect(() => {
     let acceptedHash = window.location.hash || '#/';
     const change = () => {
@@ -26,6 +27,9 @@ export default function App() {
     return () => window.removeEventListener('hashchange', change);
   }, []);
   const [path, query = ''] = route.split('?');
+  useEffect(() => {
+    if (derivedChecklistId !== null && path === `/checklists/${derivedChecklistId}`) setDerivedChecklistId(null);
+  }, [path, derivedChecklistId]);
   const responseRoute = /^\/evaluations\/(\d+)\/respond$/.exec(path);
   const evaluationDetail = /^\/evaluations\/(\d+)$/.exec(path);
   const checklistDetail = /^\/checklists\/(\d+)$/.exec(route);
@@ -54,7 +58,7 @@ export default function App() {
       : evaluationDetail ? <EvaluationDetail key={evaluationDetail[1]} id={Number(evaluationDetail[1])} />
       : route === '/checklists' ? <ChecklistList />
       : route === '/checklists/new' ? <ChecklistCreate />
-      : checklistDetail ? <ChecklistDetail key={checklistDetail[1]} id={Number(checklistDetail[1])} />
+      : checklistDetail ? <ChecklistDetail key={checklistDetail[1]} id={Number(checklistDetail[1])} derivationCreated={derivedChecklistId === Number(checklistDetail[1])} onDerived={id => {setDerivedChecklistId(id); window.location.hash = `/checklists/${id}`;}} />
       : detail ? <ArchitectureDetail key={detail[1]} id={Number(detail[1])} />
       : <section className="card"><h1>Página não encontrada</h1><a href="#/">Voltar ao início</a></section>}
   </AppLayout>;

@@ -26,6 +26,10 @@ class CreateChecklistInput(MetadataInput):
     initial_version = VersionInput()
 
 
+class DeriveChecklistInput(CreateChecklistInput):
+    source_checklist_version_id = serializers.IntegerField(min_value=1, max_value=9223372036854775807)
+
+
 class SectionInput(StrictInputSerializer):
     name = serializers.CharField(max_length=255)
     order_index = serializers.IntegerField(min_value=0, max_value=2147483647, required=False)
@@ -90,9 +94,24 @@ class ChecklistSerializer(serializers.ModelSerializer):
 
 class ChecklistDetailSerializer(ChecklistSerializer):
     versions = VersionSerializer(many=True, read_only=True)
+    derivation_source = serializers.SerializerMethodField()
+
+    def get_derivation_source(self, obj):
+        from .permissions import accessible_checklists
+
+        if obj.derived_from_checklist_version_id is None:
+            return None
+        # Filter before reading origin metadata: a public derivative does not
+        # grant access to a now-private source, even through cross references.
+        source = ChecklistVersion.objects.filter(pk=obj.derived_from_checklist_version_id,
+            checklist__in=accessible_checklists(self.context['request'].user)).select_related('checklist').first()
+        if source is None:
+            return {'available': False}
+        return {'available': True, 'checklist_id': source.checklist_id,
+                'name': source.checklist.name, 'version_id': source.pk, 'version': source.version}
 
     class Meta(ChecklistSerializer.Meta):
-        fields = ChecklistSerializer.Meta.fields + ['versions']
+        fields = ChecklistSerializer.Meta.fields + ['versions', 'derivation_source']
 
 
 class SectionSerializer(serializers.ModelSerializer):

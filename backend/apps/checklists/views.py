@@ -36,6 +36,14 @@ class ChecklistListView(APIView):
         return checklist_response(request, item.pk, status=201)
 
 
+class DeriveChecklistView(APIView):
+    def post(self, request):
+        serializer = schema.DeriveChecklistInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        item = services.derive_checklist(user=request.user, **serializer.validated_data)
+        return checklist_response(request, item.pk, status=201)
+
+
 class ChecklistDetailView(APIView):
     def get(self, request, pk):
         return checklist_response(request, pk)

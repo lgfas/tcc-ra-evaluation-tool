@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { api } from '../services/api';
 import { checklistBase as base, checklistError, type Checklist, type ChecklistSummary, type ChecklistVersion } from '../services/checklists';
 import PageHeader from '../components/PageHeader';
@@ -89,14 +89,45 @@ function VersionEditor({ checklist, onSaved, onClose }: {checklist: Checklist; o
       <div className="actions form-actions"><button type="button" className="secondary" disabled={busy} onClick={onClose}>Cancelar</button><button disabled={busy}>{busy ? 'Salvando…' : 'Criar versão'}</button></div></form>
   </EditorPanel>;
 }
-export function ChecklistDetail({ id }: {id: number}) {
+function DerivationEditor({ checklist, version, onCreated, onClose }: {
+  checklist: Checklist; version: ChecklistVersion; onCreated: (id: number) => void; onClose: () => void;
+}) {
+  const suffix = ' — Adaptação';
+  const [metadata, setMetadata] = useState<Metadata>({name:checklist.name.slice(0, 255 - suffix.length) + suffix, origin:checklist.origin, visibility:'PRIVATE'});
+  const [identifier, setIdentifier] = useState('1.0');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const submitting = useRef(false);
+  async function save(event: FormEvent) {
+    event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true; setBusy(true); setError('');
+    try {
+      const result = await api<Checklist>(`${base}derive/`, 'POST', {
+        source_checklist_version_id:version.id, ...metadata, initial_version:{version:identifier},
+      });
+      onCreated(result.id);
+      // Keep both guards until navigation unmounts this panel.
+    } catch (err) {setError(checklistError(err)); submitting.current = false; setBusy(false);}
+  }
+  return <EditorPanel title="Criar derivação" onClose={onClose} busy={busy}>
+    <p>Origem da derivação: <strong>{checklist.name} — versão {version.version}</strong>.</p>
+    <p>Será criada uma nova checklist independente, de sua propriedade. Seções, questões, opções e stakeholders serão copiados. Avaliações e respostas não serão copiadas.</p>
+    {error && <Notice message={error} error />}<form onSubmit={save}><fieldset disabled={busy}>
+      <MetadataFields value={metadata} onChange={setMetadata} />
+      <label>Identificador da primeira versão<input required maxLength={100} value={identifier} onChange={event => setIdentifier(event.target.value)} /></label>
+      <small>O identificador da nova versão é independente da versão de origem. A checklist será salva somente ao confirmar.</small>
+    </fieldset><div className="actions form-actions"><button type="button" className="secondary" disabled={busy} onClick={onClose}>Cancelar</button><button disabled={busy}>{busy ? 'Criando derivação…' : 'Confirmar derivação'}</button></div></form>
+  </EditorPanel>;
+}
+export function ChecklistDetail({ id, derivationCreated = false, onDerived }: {id: number; derivationCreated?: boolean; onDerived: (id: number) => void}) {
   const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState(derivationCreated ? 'Checklist derivada criada com sucesso. A estrutura foi copiada e pode ser editada independentemente.' : '');
   const [retry, setRetry] = useState(0);
-  const [editor, setEditor] = useState<'metadata' | 'version' | null>(null);
+  const [editor, setEditor] = useState<'metadata' | 'version' | 'derive' | null>(null);
   useEffect(() => {
     let active = true;
     setLoading(true); setError('');
@@ -109,10 +140,11 @@ export function ChecklistDetail({ id }: {id: number}) {
   if (!checklist || error) return <section className="page-stack"><PageHeader title="Checklist indisponível" /><Notice message={error || 'Não foi possível carregar a checklist.'} error /><a href="#/checklists">Voltar à listagem</a><button onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></section>;
   return <section className="page-stack checklist-page"><PageHeader title={checklist.name} eyebrow={<><a href="#/checklists">Checklist</a>{checklist.visibility === 'PUBLIC' && <> · <a href="#/catalog">Voltar ao catálogo</a></>}</>}
     badge={<span className="badge">{checklist.visibility === 'PUBLIC' ? 'Pública' : 'Privada'}</span>}
-    actions={<>{checklist.can_edit && <><button className="secondary" onClick={() => {setEditor('metadata'); setSuccess('');}}>Alterar dados</button><button onClick={() => {setEditor('version'); setSuccess('');}}>+ Nova versão</button></>}{selected !== null && <a className="button-link" href={`#/evaluations/new?checklist_version_id=${selected}`}>Utilizar em avaliação</a>}</>} />
+    actions={<>{checklist.can_edit && <><button className="secondary" onClick={() => {setEditor('metadata'); setSuccess('');}}>Alterar dados</button><button onClick={() => {setEditor('version'); setSuccess('');}}>+ Nova versão</button></>}{selected !== null && <>{checklist.visibility === 'PUBLIC' && <button className="secondary" onClick={() => {setEditor('derive'); setSuccess('');}}>Criar derivação</button>}<a className="button-link" href={`#/evaluations/new?checklist_version_id=${selected}`}>Utilizar em avaliação</a></>}</>} />
     <div className="metadata-row"><label className="version-selector"><span className="sr-only">Versão selecionada</span><select value={selected ?? ''} onChange={event => {setSelected(Number(event.target.value)); setSuccess('');}}>
       {checklist.versions.map(version => <option key={version.id} value={version.id}>Versão {version.version}</option>)}</select></label><p className="muted checklist-origin">Origem: {checklist.origin || 'Não informada'}</p></div>
     {!checklist.can_edit && <p className="muted">Consulta pública · Somente leitura</p>}{success && <Notice message={success} />}
+    {checklist.derived_from_checklist_version !== null && <p className="muted">{checklist.derivation_source?.available ? <>Derivada de: <a href={`#/checklists/${checklist.derivation_source.checklist_id}`}>{checklist.derivation_source.name} — versão {checklist.derivation_source.version}</a></> : 'Checklist derivada · A origem não está disponível para consulta.'}</p>}
     {checklist.versions.find(version => version.id === selected)?.is_frozen && <p className="preservation-note">Esta versão está preservada por uma avaliação iniciada ou concluída. Crie uma nova versão para alterar sua estrutura.</p>}
     {selected !== null ? <ChecklistStructure key={selected} path={`${base}${id}/versions/${selected}/`} canEdit={checklist.can_edit && !checklist.versions.find(version => version.id === selected)?.is_frozen} /> : <EmptyState title="Nenhuma versão disponível" />}
     {checklist.can_edit && editor === 'metadata' && <MetadataEditor checklist={checklist} onClose={() => setEditor(null)} onSaved={next => {setChecklist(next); setEditor(null); setSuccess('Dados da checklist atualizados.');}} />}
@@ -120,5 +152,6 @@ export function ChecklistDetail({ id }: {id: number}) {
       setChecklist(current => current ? {...current, versions:[version, ...current.versions], version_count:current.version_count + 1} : current);
       setSelected(version.id); setEditor(null); setSuccess('Nova versão criada.');
     }} />}
+    {checklist.visibility === 'PUBLIC' && editor === 'derive' && selected !== null && <DerivationEditor checklist={checklist} version={checklist.versions.find(version => version.id === selected)!} onCreated={onDerived} onClose={() => setEditor(null)} />}
   </section>;
 }
