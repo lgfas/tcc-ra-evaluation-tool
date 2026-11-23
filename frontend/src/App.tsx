@@ -3,6 +3,7 @@ import { api, ApiError, type User } from './services/api';
 import { ChecklistList, ChecklistCreate, ChecklistDetail } from './pages/ChecklistsPage';
 import { EvaluationList, EvaluationCreate, EvaluationDetail } from './pages/EvaluationsPage';
 import EvaluationRespondPage from './pages/EvaluationRespondPage';
+import CatalogPage from './pages/CatalogPage';
 import { allowAnswerNavigation } from './services/evaluations';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
@@ -47,7 +48,8 @@ export default function App() {
       : route === '/reference-architectures' ? <ArchitectureList />
       : route === '/reference-architectures/new' ? <ArchitectureCreate />
       : path === '/evaluations' ? <EvaluationList />
-      : path === '/evaluations/new' ? <EvaluationCreate key={route} initialRaVersionId={Number(new URLSearchParams(query).get('ra_version_id')) || 0} />
+      : path === '/evaluations/new' ? <EvaluationCreate key={route} initialRaVersionId={Number(new URLSearchParams(query).get('ra_version_id')) || 0} initialChecklistVersionId={Number(new URLSearchParams(query).get('checklist_version_id')) || 0} />
+      : path === '/catalog' ? <CatalogPage />
       : responseRoute ? <EvaluationRespondPage key={responseRoute[1]} id={Number(responseRoute[1])} />
       : evaluationDetail ? <EvaluationDetail key={evaluationDetail[1]} id={Number(evaluationDetail[1])} />
       : route === '/checklists' ? <ChecklistList />

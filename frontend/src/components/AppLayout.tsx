@@ -4,7 +4,7 @@ import Notice from './Notice';
 import { allowAnswerNavigation } from '../services/evaluations';
 import navDot from '../assets/nav-dot.svg';
 
-const pending = ['Arq. Concretas', 'Catálogo'];
+const pending = ['Arq. Concretas'];
 export default function AppLayout({ user, route, onLogout, children }: {
   user: User; route: string; onLogout: () => void; children: ReactNode;
 }) {
@@ -52,6 +52,7 @@ export default function AppLayout({ user, route, onLogout, children }: {
         <a href="#/checklists" aria-current={route.startsWith('/checklists') ? 'page' : undefined}><img src={navDot} alt="" />Checklists</a>
         <a href="#/evaluations" aria-current={route.startsWith('/evaluations') ? 'page' : undefined}><img src={navDot} alt="" />Avaliações</a>
         {pending.map(label => <span key={label} className="nav-unavailable" aria-disabled="true" title="Ainda não disponível"><img src={navDot} alt="" />{label}<small className="sr-only">Ainda não disponível</small></span>)}
+        <a href="#/catalog" aria-current={route.startsWith('/catalog') ? 'page' : undefined}><img src={navDot} alt="" />Catálogo</a>
       </nav>
       <div className="sidebar-account"><p className="eyebrow">Conta do usuário</p><strong>{user.name}</strong><span>{user.email}</span>
         <button className="secondary" disabled={busy} onClick={exit}>{busy ? 'Encerrando…' : 'Encerrar sessão'}</button>

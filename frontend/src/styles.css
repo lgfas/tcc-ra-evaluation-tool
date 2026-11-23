@@ -256,3 +256,10 @@ textarea { resize: vertical; min-height: 140px; }
 
 .participant-progress { padding: 16px; gap: 8px; }
 .participant-progress h4, .participant-progress p { margin: 0; }
+
+.catalog-search { display: flex; align-items: end; gap: 16px; }
+.catalog-search label { flex: 1; min-width: 0; }
+.catalog-card { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .catalog-search { flex-direction: column; align-items: stretch; }
+}

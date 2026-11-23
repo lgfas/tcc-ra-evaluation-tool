@@ -107,9 +107,9 @@ export function ChecklistDetail({ id }: {id: number}) {
   }, [id, retry]);
   if (loading) return <p role="status">Carregando checklist…</p>;
   if (!checklist || error) return <section className="page-stack"><PageHeader title="Checklist indisponível" /><Notice message={error || 'Não foi possível carregar a checklist.'} error /><a href="#/checklists">Voltar à listagem</a><button onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></section>;
-  return <section className="page-stack checklist-page"><PageHeader title={checklist.name} eyebrow={<a href="#/checklists">Checklist</a>}
+  return <section className="page-stack checklist-page"><PageHeader title={checklist.name} eyebrow={<><a href="#/checklists">Checklist</a>{checklist.visibility === 'PUBLIC' && <> · <a href="#/catalog">Voltar ao catálogo</a></>}</>}
     badge={<span className="badge">{checklist.visibility === 'PUBLIC' ? 'Pública' : 'Privada'}</span>}
-    actions={checklist.can_edit ? <><button className="secondary" onClick={() => {setEditor('metadata'); setSuccess('');}}>Alterar dados</button><button onClick={() => {setEditor('version'); setSuccess('');}}>+ Nova versão</button></> : undefined} />
+    actions={<>{checklist.can_edit && <><button className="secondary" onClick={() => {setEditor('metadata'); setSuccess('');}}>Alterar dados</button><button onClick={() => {setEditor('version'); setSuccess('');}}>+ Nova versão</button></>}{selected !== null && <a className="button-link" href={`#/evaluations/new?checklist_version_id=${selected}`}>Utilizar em avaliação</a>}</>} />
     <div className="metadata-row"><label className="version-selector"><span className="sr-only">Versão selecionada</span><select value={selected ?? ''} onChange={event => {setSelected(Number(event.target.value)); setSuccess('');}}>
       {checklist.versions.map(version => <option key={version.id} value={version.id}>Versão {version.version}</option>)}</select></label><p className="muted checklist-origin">Origem: {checklist.origin || 'Não informada'}</p></div>
     {!checklist.can_edit && <p className="muted">Consulta pública · Somente leitura</p>}{success && <Notice message={success} />}

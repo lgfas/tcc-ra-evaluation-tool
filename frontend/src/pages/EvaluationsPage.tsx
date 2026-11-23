@@ -35,8 +35,8 @@ export function EvaluationList() {
   </section>;
 }
 
-export function EvaluationCreate({ initialRaVersionId }: {initialRaVersionId: number}) {
-  const [selection, setSelection] = useState<VersionSelection>({ra_version_id:initialRaVersionId, checklist_version_id:0});
+export function EvaluationCreate({ initialRaVersionId, initialChecklistVersionId = 0 }: {initialRaVersionId: number; initialChecklistVersionId?: number}) {
+  const [selection, setSelection] = useState<VersionSelection>({ra_version_id:initialRaVersionId, checklist_version_id:initialChecklistVersionId});
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -54,7 +54,7 @@ export function EvaluationCreate({ initialRaVersionId }: {initialRaVersionId: nu
   return <section className="page-stack form-page"><PageHeader title="Nova avaliação por checklist" eyebrow={<a href="#/evaluations">← Minhas Avaliações</a>} />
     <div className="card"><p>Selecione uma versão de RA e uma versão de checklist. A avaliação será criada como rascunho, sem participantes automáticos.</p>
       {error && <Notice message={error} error />}<form onSubmit={create}>
-        <EvaluationSelection initial={{ra_version_id:initialRaVersionId, checklist_version_id:0}} onChange={setSelection} onReady={setReady} disabled={busy} />
+        <EvaluationSelection initial={{ra_version_id:initialRaVersionId, checklist_version_id:initialChecklistVersionId}} onChange={setSelection} onReady={setReady} disabled={busy} />
         <div className="actions form-actions"><button disabled={busy || !ready || !selection.ra_version_id || !selection.checklist_version_id}>{busy ? 'Criando…' : 'Criar avaliação'}</button></div>
       </form></div>
   </section>;

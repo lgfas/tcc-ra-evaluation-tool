@@ -109,7 +109,7 @@ export function ArchitectureDetail({id}: {id: number}) {
   return <section className="page-stack">
     {error && mode === 'read' && <Notice message={error} error />}{success && <Notice message={success} />}
     {loading ? <p role="status">Carregando arquitetura…</p> : !architecture ? <><PageHeader title="Arquitetura indisponível" /><a href="#/reference-architectures">Voltar à listagem</a><button onClick={load}>Tentar novamente</button></> : <>
-      <PageHeader title={architecture.name} eyebrow={<a href="#/reference-architectures">Arquitetura de Referência</a>}
+      <PageHeader title={architecture.name} eyebrow={<><a href="#/reference-architectures">Arquitetura de Referência</a>{architecture.visibility === 'PUBLIC' && <> · <a href="#/catalog">Voltar ao catálogo</a></>}</>}
         badge={<span className="badge">{architecture.visibility === 'PUBLIC' ? 'Pública' : 'Privada'}</span>}
         actions={<>{architecture.role === 'OWNER' && <button className="secondary" onClick={() => openEditor('metadata')}>Alterar dados da RA</button>}
           {canEdit && <button onClick={() => openEditor('version')}>+ Nova versão</button>}
